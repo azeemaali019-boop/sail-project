@@ -1,0 +1,164 @@
+
+export default function SAILDashboard() {
+  const salesData = [
+    {
+      dealer: "Dealer A",
+      distributor: "Distributor X",
+      product: "Steel Rod",
+      qty: 120,
+      amount: "₹2,40,000",
+      status: "Paid",
+    },
+    {
+      dealer: "Dealer B",
+      distributor: "Distributor Y",
+      product: "Steel Sheet",
+      qty: 80,
+      amount: "₹1,75,000",
+      status: "Pending",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-lg p-6 mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            SAIL Sales Flow & Financial Tracking Dashboard
+          </h1>
+          <p className="text-gray-500">
+            Manufacturer → Dealer → Distributor Monitoring System
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-2xl shadow p-5">
+            <h2 className="text-gray-500 text-sm">Total Sales</h2>
+            <p className="text-2xl font-bold mt-2">₹12.5 Cr</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-5">
+            <h2 className="text-gray-500 text-sm">Pending Payments</h2>
+            <p className="text-2xl font-bold mt-2 text-red-500">₹2.1 Cr</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-5">
+            <h2 className="text-gray-500 text-sm">Active Dealers</h2>
+            <p className="text-2xl font-bold mt-2">42</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-5">
+            <h2 className="text-gray-500 text-sm">Distributors</h2>
+            <p className="text-2xl font-bold mt-2">126</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-lg p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Sales Transactions
+            </h2>
+
+            <div className="flex gap-3">
+              <input
+                type="text"
+                placeholder="Search dealer or product"
+                className="border rounded-xl px-4 py-2 outline-none"
+              />
+
+              <button className="bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 transition">
+                Filter
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100 text-left">
+                  <th className="p-4">Dealer</th>
+                  <th className="p-4">Distributor</th>
+                  <th className="p-4">Product</th>
+                  <th className="p-4">Quantity</th>
+                  <th className="p-4">Amount</th>
+                  <th className="p-4">Payment Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {salesData.map((item, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-50">
+                    <td className="p-4">{item.dealer}</td>
+                    <td className="p-4">{item.distributor}</td>
+                    <td className="p-4">{item.product}</td>
+                    <td className="p-4">{item.qty}</td>
+                    <td className="p-4 font-semibold">{item.amount}</td>
+                    <td className="p-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          item.status === "Paid"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div className="bg-white rounded-3xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              Inventory Reconciliation
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>Dealer Stock Utilization</span>
+                  <span>78%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div className="bg-blue-600 h-3 rounded-full w-[78%]"></div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>Distributor Sales Match</span>
+                  <span>92%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div className="bg-green-600 h-3 rounded-full w-[92%]"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Alerts & Notifications</h2>
+
+            <div className="space-y-3">
+              <div className="bg-red-100 text-red-700 p-4 rounded-xl">
+                Dealer B has overdue payment of ₹4,50,000
+              </div>
+
+              <div className="bg-yellow-100 text-yellow-700 p-4 rounded-xl">
+                Stock mismatch detected for Steel Sheets
+              </div>
+
+              <div className="bg-green-100 text-green-700 p-4 rounded-xl">
+                Dealer A payment received successfully
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
