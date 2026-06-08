@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SAIL Login Page</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
 
     body {
       height: 100vh;
@@ -25,9 +22,10 @@
       border-radius: 20px;
       overflow: hidden;
       display: flex;
-      box-shadow: 0px 10px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
+    /* Left panel */
     .left-panel {
       width: 50%;
       background: #003366;
@@ -39,238 +37,155 @@
       align-items: center;
       text-align: center;
     }
-
-    .left-panel h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-    }
-
-    .left-panel h2 {
-      font-size: 28px;
-      margin-bottom: 20px;
-    }
-
-    .left-panel p {
-      font-size: 16px;
-      line-height: 1.6;
-      color: #d9e6f2;
-    }
+    .left-panel h1 { font-size:48px; margin-bottom:20px; }
+    .left-panel h2 { font-size:24px; margin-bottom:20px; }
+    .left-panel p  { font-size:15px; line-height:1.6; color:#d9e6f2; }
 
     .logo-circle {
-      width: 150px;
-      height: 150px;
+      width: 130px; height: 130px;
       background: #0059b3;
       border-radius: 50%;
-      margin-top: 40px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 60px;
-      font-weight: bold;
+      margin-top: 30px;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 42px; font-weight: bold;
       overflow: hidden;
     }
+    .logo-circle img { width:100%; height:100%; object-fit:cover; }
 
-    .logo-circle img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
+    /* Right panel */
     .right-panel {
       width: 50%;
-      padding: 60px 50px;
+      padding: 50px 45px;
       display: flex;
       flex-direction: column;
       justify-content: center;
     }
+    .right-panel h2 { font-size:28px; color:#333; margin-bottom:6px; }
+    .right-panel > p { color:gray; margin-bottom:24px; font-size:14px; }
 
-    .right-panel h2 {
-      font-size: 32px;
-      color: #333;
-      margin-bottom: 10px;
-    }
-
-    .right-panel p {
-      color: gray;
-      margin-bottom: 30px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #444;
-      font-weight: bold;
-    }
-
+    .form-group { margin-bottom:16px; }
+    .form-group label { display:block; margin-bottom:6px; color:#444; font-weight:bold; font-size:14px; }
     .form-group input,
     .form-group select {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 15px;
+      width: 100%; padding: 12px 14px;
+      border: 1px solid #ccc; border-radius: 10px; font-size: 14px;
     }
-
     .form-group input:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #0059b3;
-    }
+    .form-group select:focus { outline:none; border-color:#0059b3; box-shadow:0 0 0 3px rgba(0,89,179,0.12); }
 
     .options {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
-      font-size: 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px; font-size: 13px;
     }
+    .options a { text-decoration:none; color:#0059b3; }
 
-    .options a {
-      text-decoration: none;
-      color: #0059b3;
+    .error-msg {
+      color: #dc2626; font-size:13px;
+      margin-bottom: 10px; display: none;
+      background:#fee2e2; padding:8px 12px; border-radius:6px;
     }
 
     .login-btn {
-      width: 100%;
-      padding: 15px;
-      background: #0059b3;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
+      width:100%; padding:13px;
+      background:#0059b3; color:white;
+      border:none; border-radius:10px;
+      font-size:15px; font-weight:bold;
+      cursor:pointer; transition:0.3s;
     }
+    .login-btn:hover { background:#004080; }
 
-    .login-btn:hover {
-      background: #004080;
-    }
+    .footer { margin-top:20px; text-align:center; color:gray; font-size:12px; }
 
-    .error-msg {
-      color: #dc2626;
-      font-size: 13px;
-      margin-top: -10px;
-      margin-bottom: 10px;
-      display: none;
-    }
-
-    .footer {
-      margin-top: 25px;
-      text-align: center;
-      color: gray;
-      font-size: 13px;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-        width: 95%;
-        height: auto;
-      }
-
-      .left-panel,
-      .right-panel {
-        width: 100%;
-      }
-
-      .left-panel {
-        padding: 30px;
-      }
-
-      .right-panel {
-        padding: 40px 30px;
-      }
+    @media (max-width:768px) {
+      .container { flex-direction:column; width:95%; height:auto; }
+      .left-panel, .right-panel { width:100%; }
+      .left-panel { padding:30px; }
+      .right-panel { padding:35px 25px; }
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
-    <div class="left-panel">
-      <h1>SAIL</h1>
-      <h2>Sales Flow & Financial Tracking System</h2>
-      <p>
-        Monitor dealer purchases, distributor sales,
-        inventory flow, and financial transactions
-        across the SAIL distribution network.
-      </p>
-      <div class="logo-circle">
-        <img src="SAIL_Logo.png" alt="SAIL Logo" onerror="this.style.display='none';this.parentElement.textContent='SAIL'">
-      </div>
-    </div>
 
-    <div class="right-panel">
-      <h2>Welcome to SAIL</h2>
-      <p>Login to continue to dashboard</p>
+<div class="container">
 
-      <!-- NOTE: No action= attribute; JS handles navigation -->
-      <form id="loginForm">
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" id="emailInput" placeholder="Enter your email" required>
-        </div>
-
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="passwordInput" placeholder="Enter your password" required>
-        </div>
-
-        <div class="form-group">
-          <label>Login Role</label>
-          <select id="roleSelect">
-            <option>SAIL Admin</option>
-            <option>Dealer</option>
-            <option>Distributor</option>
-          </select>
-        </div>
-
-        <div class="options">
-          <label>
-            <input type="checkbox"> Remember Me
-          </label>
-          <a href="#">Forgot Password?</a>
-        </div>
-
-        <p class="error-msg" id="errorMsg">Invalid credentials. Please try again.</p>
-
-        <button type="submit" class="login-btn">Login</button>
-      </form>
-
-      <div class="footer">
-        © 2026 SAIL Financial Tracking System
-      </div>
+  <!-- Left -->
+  <div class="left-panel">
+    <h1>SAIL</h1>
+    <h2>Sales Flow &amp; Financial Tracking System</h2>
+    <p>Monitor dealer purchases, distributor sales, inventory flow, and financial transactions across the SAIL distribution network.</p>
+    <div class="logo-circle">
+      <img src="SAIL_Logo.png" alt="SAIL"
+           onerror="this.style.display='none'; this.parentElement.textContent='SAIL'">
     </div>
   </div>
 
-  <script>
-    // Clear any stale session on landing at login page
-    localStorage.removeItem('loggedIn');
+  <!-- Right -->
+  <div class="right-panel">
+    <h2>Welcome to SAIL</h2>
+    <p>Login to continue to your dashboard</p>
 
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      // Always prevent default — we handle navigation manually
-      e.preventDefault();
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="emailInput" placeholder="Enter your email" required>
+      </div>
 
-      const email = document.getElementById('emailInput').value.trim();
-      const password = document.getElementById('passwordInput').value;
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="passwordInput" placeholder="Enter your password" required>
+      </div>
 
-      // Basic validation (expand with real auth as needed)
-      if (!email || !password) {
-        document.getElementById('errorMsg').style.display = 'block';
-        return;
-      }
+      <div class="form-group">
+        <label>Login Role</label>
+        <select id="roleSelect">
+          <option>SAIL Admin</option>
+          <option>Dealer</option>
+          <option>Distributor</option>
+        </select>
+      </div>
 
-      // Set login flag BEFORE navigating
-      localStorage.setItem('loggedIn', 'true');
-      localStorage.setItem('userRole', document.getElementById('roleSelect').value);
+      <div class="options">
+        <label><input type="checkbox"> Remember Me</label>
+        <a href="#">Forgot Password?</a>
+      </div>
 
-      // Now navigate
-      window.location.href = 'dashboard.html';
-    });
-  </script>
+      <p class="error-msg" id="errorMsg">Please enter your email and password.</p>
+
+      <button type="submit" class="login-btn">Login</button>
+    </form>
+
+    <div class="footer">© 2026 SAIL Financial Tracking System</div>
+  </div>
+
+</div>
+
+<script>
+  // Clear any stale session when landing on login page
+  localStorage.removeItem('loggedIn');
+  localStorage.removeItem('userRole');
+
+  document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault(); // CRITICAL: stop browser navigation
+
+    var email    = document.getElementById('emailInput').value.trim();
+    var password = document.getElementById('passwordInput').value;
+    var errorMsg = document.getElementById('errorMsg');
+
+    if (!email || !password) {
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    errorMsg.style.display = 'none';
+
+    // Set login state BEFORE navigating
+    localStorage.setItem('loggedIn', 'true');
+    localStorage.setItem('userRole', document.getElementById('roleSelect').value);
+
+    // Navigate to dashboard
+    window.location.href = 'dashboard.html';
+  });
+</script>
+
 </body>
 </html>

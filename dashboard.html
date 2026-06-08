@@ -1,162 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAIL Dashboard</title>
-
-    <link rel="stylesheet" href="style.css">
-    <!-- <script src="p.js"></script> -->
-
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAIL Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- FontAwesome from cdnjs (reliable, no account needed) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
- <!-- <script src="p.js"></script>  -->
-    <div class="container">
 
-        <!-- Sidebar -->
+<div class="container">
 
-        <div class="sidebar">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>SAIL</h2>
+    <ul>
+      <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+      <li><a href="dealer.html" class="nav-link">Dealers</a></li>
+      <li><a href="distributors.html" class="nav-link">Distributors</a></li>
+      <li><a href="inventory.html" class="nav-link">Inventory</a></li>
+      <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
+      <li><a href="reports.html" class="nav-link">Reports</a></li>
+      <li><a href="form.html" class="nav-link">Logout</a></li>
+    </ul>
+  </div>
 
-            <h2>SAIL</h2>
+  <!-- Main Content -->
+  <div class="main-content">
 
-            <ul>
-                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-                <li><a href="dealer.html" class="nav-link">Dealers</a></li>
-                <li><a href="distributors.html" class="nav-link">Distributors</a></li>
-                <li><a href="inventory.html" class="nav-link">Inventory</a></li>
-                <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
-                <li><a href="reports.html" class="nav-link">Reports</a></li>
-                <li><a href="form.html" class="nav-link">Logout</a></li>
-            </ul>
-
-        </div>
-
-        <!-- Main Content -->
-
-        <div class="main-content">
-
-            <!-- Top Navbar -->
-
-            <div class="topbar">
-
-                <h1>Sales Flow Dashboard</h1>
-
-                <div class="profile">
-                    Admin
-                </div>
-
-            </div>
-
-            <!-- Cards -->
-
-            <div class="cards">
-
-                <div class="card">
-                    <h3>Total Dealer Sales</h3>
-                    <p>₹ 12,50,000</p>
-                </div>
-
-                <div class="card">
-                    <h3>Total Distributor Sales</h3>
-                    <p>₹ 8,75,000</p>
-                </div>
-
-                <div class="card">
-                    <h3>Pending Payments</h3>
-                    <p>₹ 2,20,000</p>
-                </div>
-
-                <div class="card">
-                    <h3>Available Stock</h3>
-                    <p>1450 Units</p>
-                </div>
-
-            </div>
-
-            <!-- Table Section -->
-
-            <div class="table-section">
-
-                <h2>Recent Dealer Transactions</h2>
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>Dealer</th>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        <tr>
-                            <td>Dealer A</td>
-                            <td>Steel Rod</td>
-                            <td>120</td>
-                            <td>₹ 1,20,000</td>
-                            <td>Paid</td>
-                        </tr>
-
-                        <tr>
-                            <td>Dealer B</td>
-                            <td>Steel Pipe</td>
-                            <td>90</td>
-                            <td>₹ 95,000</td>
-                            <td>Pending</td>
-                        </tr>
-
-                        <tr>
-                            <td>Dealer C</td>
-                            <td>Steel Sheet</td>
-                            <td>70</td>
-                            <td>₹ 75,000</td>
-                            <td>Paid</td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
+    <div class="topbar">
+      <h1>Sales Flow Dashboard</h1>
+      <div class="profile" id="profileLabel">Admin</div>
     </div>
 
-    <script>
-        const sidebarLinks = document.querySelectorAll('.sidebar ul li a');
+    <!-- Summary Cards -->
+    <div class="cards">
+      <div class="card">
+        <h3>Total Dealer Sales</h3>
+        <p>₹ 12,50,000</p>
+      </div>
+      <div class="card">
+        <h3>Total Distributor Sales</h3>
+        <p>₹ 8,75,000</p>
+      </div>
+      <div class="card">
+        <h3>Pending Payments</h3>
+        <p>₹ 2,20,000</p>
+      </div>
+      <div class="card">
+        <h3>Available Stock</h3>
+        <p>1450 Units</p>
+      </div>
+    </div>
 
-        function clearActiveLink() {
-            sidebarLinks.forEach(link => link.classList.remove('active'));
-        }
+    <!-- Recent Transactions -->
+    <div class="table-section">
+      <h2>Recent Dealer Transactions</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Dealer</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Dealer A</td><td>Steel Rod</td><td>120</td>
+            <td>₹ 1,20,000</td><td><span class="status-text status-active">Paid</span></td>
+          </tr>
+          <tr>
+            <td>Dealer B</td><td>Steel Pipe</td><td>90</td>
+            <td>₹ 95,000</td><td><span class="status-text status-inactive">Pending</span></td>
+          </tr>
+          <tr>
+            <td>Dealer C</td><td>Steel Sheet</td><td>70</td>
+            <td>₹ 75,000</td><td><span class="status-text status-active">Paid</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', event => {
-                const target = event.currentTarget.dataset.target;
+  </div>
+</div>
 
-                clearActiveLink();
-                event.currentTarget.classList.add('active');
-
-                if (target === 'distributors' || target === 'inventory' || target === 'financial' || target === 'reports') {
-                    event.preventDefault();
-                    alert('This section is under construction. Coming soon!');
-                }
-
-                if (target === 'logout') {
-                    window.location.href = 'form.html';
-                }
-            });
-        });
-    </script>
+<!-- Auth guard + sidebar logic -->
+<script src="auth.js"></script>
+<script>
+  // Show logged-in role in topbar
+  var role = localStorage.getItem('userRole');
+  if (role) document.getElementById('profileLabel').textContent = role;
+</script>
 
 </body>
 </html>

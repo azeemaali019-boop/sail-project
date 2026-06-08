@@ -1,46 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAIL Reports</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAIL Reports</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <h2>SAIL</h2>
-            <ul>
-                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-                <li><a href="dealer.html" class="nav-link">Dealers</a></li>
-                <li><a href="distributors.html" class="nav-link">Distributors</a></li>
-                <li><a href="inventory.html" class="nav-link">Inventory</a></li>
-                <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
-                <li><a href="reports.html" class="nav-link">Reports</a></li>
-                <li><a href="form.html" class="nav-link">Logout</a></li>
-            </ul>
-        </div>
-        <div class="main-content">
-            <div class="topbar">
-                <h1>Reports</h1>
-                <div class="profile">Admin</div>
-            </div>
-            <div class="table-section">
-                <h2>Reports Overview</h2>
-                <p>Generate sales, payment, and inventory reports for your team.</p>
-                <p>This page is ready for your reporting widgets and dashboard charts.</p>
-            </div>
-        </div>
+<div class="container">
+  <div class="sidebar">
+    <h2>SAIL</h2>
+    <ul>
+      <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+      <li><a href="dealer.html" class="nav-link">Dealers</a></li>
+      <li><a href="distributors.html" class="nav-link">Distributors</a></li>
+      <li><a href="inventory.html" class="nav-link">Inventory</a></li>
+      <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
+      <li><a href="reports.html" class="nav-link">Reports</a></li>
+      <li><a href="form.html" class="nav-link">Logout</a></li>
+    </ul>
+  </div>
+  <div class="main-content">
+    <div class="topbar">
+      <h1>Reports</h1>
+      <div class="profile" id="profileLabel">Admin</div>
     </div>
-    <script>
-        const sidebarLinks = document.querySelectorAll('.sidebar ul li a');
-        const currentPage = window.location.pathname.split('/').pop() || 'reports.html';
-        sidebarLinks.forEach(link => {
-            if (link.getAttribute('href') === currentPage) {
-                link.classList.add('active');
-            }
-        });
-    </script>
+    <div class="table-section">
+      <h2>Reports Overview</h2>
+      <p style="margin-top:12px;color:#64748b;">Generate sales, payment, and inventory reports for your team.</p>
+      <p style="margin-top:8px;color:#94a3b8;font-size:13px;">🚧 Reporting widgets and dashboard charts coming soon.</p>
+    </div>
+  </div>
+</div>
+<script src="auth.js"></script>
+<script>
+  var role = localStorage.getItem('userRole');
+  if (role) document.getElementById('profileLabel').textContent = role;
+</script>
 </body>
 </html>

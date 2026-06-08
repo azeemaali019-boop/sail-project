@@ -1,152 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAIL Dealer Management</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAIL Dealer Management</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <h2>SAIL</h2>
-            <ul>
-                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-                <li><a href="dealer.html" class="nav-link">Dealers</a></li>
-                <li><a href="distributors.html" class="nav-link">Distributors</a></li>
-                <li><a href="inventory.html" class="nav-link">Inventory</a></li>
-                <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
-                <li><a href="reports.html" class="nav-link">Reports</a></li>
-                <li><a href="form.html" class="nav-link">Logout</a></li>
-            </ul>
-        </div>
 
-        <div class="main-content">
-            <div class="topbar">
-                <h1>Dealer Management</h1>
-                <div class="profile">Admin</div>
-            </div>
+<div class="container">
 
-            <div class="page-header">
-                <h2>Registered Dealers</h2>
-                <div class="action-group">
-                    <button id="addDealerBtn" class="btn-primary">+ Add Dealer</button>
-                    <button id="exportBtn" class="btn-secondary">Export CSV</button>
-                    <button id="tableViewBtn" class="view-btn active">Table View</button>
-                    <button id="cardViewBtn" class="view-btn">Card View</button>
-                </div>
-            </div>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>SAIL</h2>
+    <ul>
+      <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+      <li><a href="dealer.html" class="nav-link">Dealers</a></li>
+      <li><a href="distributors.html" class="nav-link">Distributors</a></li>
+      <li><a href="inventory.html" class="nav-link">Inventory</a></li>
+      <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
+      <li><a href="reports.html" class="nav-link">Reports</a></li>
+      <li><a href="form.html" class="nav-link">Logout</a></li>
+    </ul>
+  </div>
 
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-info">
-                        <h3>Total Dealers</h3>
-                        <p id="totalDealers">0</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">✅</div>
-                    <div class="stat-info">
-                        <h3>Active Dealers</h3>
-                        <p id="activeDealers">0</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-info">
-                        <h3>Total Sales</h3>
-                        <p id="totalSales">₹0</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🏆</div>
-                    <div class="stat-info">
-                        <h3>Top Dealer</h3>
-                        <p id="topPerformer">-</p>
-                    </div>
-                </div>
-            </div>
+  <!-- Main Content -->
+  <div class="main-content">
 
-            <div class="search-filter-bar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Search dealers by name or location...">
-                </div>
-                <div class="filter-group">
-                    <select id="statusFilter">
-                        <option value="all">All Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="tableView">
-                <table id="dealerTable" class="innovative-table">
-                    <thead>
-                        <tr>
-                            <th>Dealer Name</th>
-                            <th>Location</th>
-                            <th>Sales</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dealerTableBody"></tbody>
-                </table>
-            </div>
-
-            <div id="cardView" style="display:none;">
-                <div id="dealerCardContainer" class="dealer-cards"></div>
-            </div>
-
-            <div id="dealerModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
-                <div class="modal-content" style="background:#fff; padding:20px; border-radius:8px; width:90%; max-width:500px; position:relative;">
-                    <span class="close" style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:24px;">&times;</span>
-                    <h2 id="modalTitle">Add New Dealer</h2>
-                    <form id="dealerForm">
-                        <input type="hidden" id="dealerId">
-                        <div class="form-group">
-                            <label for="dealerName">Dealer Name</label>
-                            <input type="text" id="dealerName" required style="width:100%; padding:8px; margin:6px 0;" />
-                        </div>
-                        <div class="form-group">
-                            <label for="dealerLocation">Location</label>
-                            <input type="text" id="dealerLocation" required style="width:100%; padding:8px; margin:6px 0;" />
-                        </div>
-                        <div class="form-group">
-                            <label for="dealerSales">Sales</label>
-                            <input type="number" id="dealerSales" required style="width:100%; padding:8px; margin:6px 0;" />
-                        </div>
-                        <div class="form-group">
-                            <label for="dealerStatus">Status</label>
-                            <select id="dealerStatus" required style="width:100%; padding:8px; margin:6px 0;">
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
-                            <button type="button" id="cancelBtn" class="btn-secondary">Cancel</button>
-                            <button type="submit" class="btn-primary">Save</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <div class="topbar">
+      <h1>Dealer Management</h1>
+      <div class="profile" id="profileLabel">Admin</div>
     </div>
 
-    <script src="dealer.js"></script>
-    <script>
-        const sidebarLinks = document.querySelectorAll('.sidebar ul li a');
-        const currentPage = window.location.pathname.split('/').pop() || 'dealer.html';
-        sidebarLinks.forEach(link => {
-            if (link.getAttribute('href') === currentPage) {
-                link.classList.add('active');
-            }
-        });
-    </script>
+    <div class="page-header">
+      <h2>Registered Dealers</h2>
+      <div class="action-group">
+        <button id="addDealerBtn" class="btn-primary">+ Add Dealer</button>
+        <button id="exportBtn"    class="btn-secondary">Export CSV</button>
+        <button id="tableViewBtn" class="view-btn active">Table View</button>
+        <button id="cardViewBtn"  class="view-btn">Card View</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info"><h3>Total Dealers</h3><p id="totalDealers">0</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info"><h3>Active Dealers</h3><p id="activeDealers">0</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-info"><h3>Total Sales</h3><p id="totalSales">₹0</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-info"><h3>Top Dealer</h3><p id="topPerformer">-</p></div>
+      </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="search-filter-bar">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search dealers by name or location...">
+      </div>
+      <div class="filter-group">
+        <select id="statusFilter">
+          <option value="all">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table View -->
+    <div id="tableView">
+      <table id="dealerTable" class="innovative-table">
+        <thead>
+          <tr>
+            <th>Dealer Name</th>
+            <th>Location</th>
+            <th>Sales</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="dealerTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Card View -->
+    <div id="cardView" style="display:none;">
+      <div id="dealerCardContainer" class="dealer-cards"></div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="dealerModal" class="modal">
+      <div class="modal-content" style="padding:24px; border-radius:12px; width:90%; max-width:500px; position:relative;">
+        <span class="close" id="closeModal" style="position:absolute;top:12px;right:16px;cursor:pointer;font-size:24px;color:#64748b;">&times;</span>
+        <h2 id="modalTitle" style="margin-bottom:20px;">Add New Dealer</h2>
+        <form id="dealerForm">
+          <input type="hidden" id="dealerId">
+          <div class="form-group">
+            <label for="dealerName">Dealer Name</label>
+            <input type="text" id="dealerName" placeholder="Enter dealer name" required>
+          </div>
+          <div class="form-group">
+            <label for="dealerLocation">Location</label>
+            <input type="text" id="dealerLocation" placeholder="Enter city/state" required>
+          </div>
+          <div class="form-group">
+            <label for="dealerSales">Sales (₹)</label>
+            <input type="number" id="dealerSales" placeholder="Enter sales amount" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="dealerStatus">Status</label>
+            <select id="dealerStatus" required>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+            <button type="button" id="cancelBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save Dealer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Auth guard + sidebar (must come before dealer.js) -->
+<script src="auth.js"></script>
+<!-- Dealer page logic -->
+<script src="dealer.js"></script>
+<script>
+  var role = localStorage.getItem('userRole');
+  if (role) document.getElementById('profileLabel').textContent = role;
+</script>
+
 </body>
 </html>
