@@ -1,177 +1,209 @@
-// Check user login
-const currentPage = window.location.pathname.split('/').pop();
-if (currentPage !== 'form.html' && localStorage.getItem('loggedIn') !== 'true') {
-    window.location.href = 'form.html';
-}
+// ─── Auth Guard ───────────────────────────────────────────────────────────────
+// Only redirect if we're NOT on the login page and not logged in
+(function checkAuth() {
+    const currentPage = window.location.pathname.split('/').pop();
+    if (currentPage !== 'form.html' && localStorage.getItem('loggedIn') !== 'true') {
+        window.location.href = 'form.html';
+    }
+})();
 
-// Logout Function
+// ─── Logout ───────────────────────────────────────────────────────────────────
 function logout() {
     localStorage.removeItem('loggedIn');
+    localStorage.removeItem('userRole');
     window.location.href = 'form.html';
 }
 
-// Initial dealer data
-let dealers = [
-    { id: 1, name: "Dealer A", location: "Mumbai", sales: 120000, status: "Active" },
-    { id: 2, name: "Dealer B", location: "Delhi", sales: 85000, status: "Active" },
-    { id: 3, name: "Dealer C", location: "Bangalore", sales: 60000, status: "Inactive" },
-    { id: 4, name: "Dealer DD", location: "Jharkhand", sales: 120000, status: "Active" }
+// ─── Data ─────────────────────────────────────────────────────────────────────
+// Fallback data used when the backend is not reachable
+const FALLBACK_DEALERS = [
+    { id: 1, name: "Dealer A",  location: "Mumbai",    sales: 120000, status: "Active"   },
+    { id: 2, name: "Dealer B",  location: "Delhi",     sales: 85000,  status: "Active"   },
+    { id: 3, name: "Dealer C",  location: "Bangalore", sales: 60000,  status: "Inactive" },
+    { id: 4, name: "Dealer D",  location: "Jharkhand", sales: 120000, status: "Active"   }
 ];
 
+let dealers = [...FALLBACK_DEALERS];
+let nextId   = 5;
+
+// ─── Backend Config ───────────────────────────────────────────────────────────
+// Change this URL if your Flask server runs on a different host/port
 const API_BASE_URL = 'http://127.0.0.1:5000';
+
+// Banner element injected to show backend status
+function showBackendBanner(connected) {
+    let banner = document.getElementById('backendBanner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'backendBanner';
+        banner.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+            padding: 8px 16px; font-size: 13px; text-align: center;
+            transition: opacity 0.5s;
+        `;
+        document.body.prepend(banner);
+    }
+    if (connected) {
+        banner.style.background = '#d1fae5';
+        banner.style.color      = '#065f46';
+        banner.textContent      = '✅ Connected to Flask backend (http://127.0.0.1:5000)';
+    } else {
+        banner.style.background = '#fef3c7';
+        banner.style.color      = '#92400e';
+        banner.textContent      = '⚠️ Backend not reachable — using local fallback data. Start Flask with: python app.py';
+    }
+    // Auto-hide after 5 seconds
+    setTimeout(() => { banner.style.opacity = '0'; }, 5000);
+    setTimeout(() => { banner.remove(); }, 5500);
+}
 
 async function loadDealersFromAPI() {
     try {
-        const response = await fetch(`${API_BASE_URL}/dealers`);
-        if (!response.ok) throw new Error(`API returned ${response.status}`);
+        const controller = new AbortController();
+        const timeoutId  = setTimeout(() => controller.abort(), 3000); // 3 s timeout
+
+        const response = await fetch(`${API_BASE_URL}/dealers`, {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
         const apiDealers = await response.json();
+
         if (Array.isArray(apiDealers) && apiDealers.length) {
             dealers = apiDealers.map(d => ({
-                id: d.id,
-                name: d.name,
+                id:       d.id,
+                name:     d.name,
                 location: d.location,
-                sales: d.sales,
-                status: d.status
+                sales:    d.sales,
+                status:   d.status
             }));
             nextId = Math.max(...dealers.map(d => d.id)) + 1;
+            showBackendBanner(true);
         }
     } catch (error) {
-        console.warn('Could not load dealers from backend:', error);
+        // AbortError = timeout; TypeError = network down; both fall back silently
+        console.warn('Backend not reachable, using fallback data:', error.message);
+        showBackendBanner(false);
     } finally {
         renderDealers();
     }
 }
 
-let nextId = 5;
+// ─── View State ───────────────────────────────────────────────────────────────
 let currentView = 'table';
 
-// DOM Elements
-const dealerTableBody = document.getElementById('dealerTableBody');
+// ─── DOM References ───────────────────────────────────────────────────────────
+const dealerTableBody     = document.getElementById('dealerTableBody');
 const dealerCardContainer = document.getElementById('dealerCardContainer');
-const searchInput = document.getElementById('searchInput');
-const statusFilter = document.getElementById('statusFilter');
-const tableViewBtn = document.getElementById('tableViewBtn');
-const cardViewBtn = document.getElementById('cardViewBtn');
-const modal = document.getElementById('dealerModal');
-const addDealerBtn = document.getElementById('addDealerBtn');
-const closeBtn = document.querySelector('.close');
-const cancelBtn = document.getElementById('cancelBtn');
-const dealerForm = document.getElementById('dealerForm');
-const exportBtn = document.getElementById('exportBtn');
+const searchInput         = document.getElementById('searchInput');
+const statusFilter        = document.getElementById('statusFilter');
+const tableViewBtn        = document.getElementById('tableViewBtn');
+const cardViewBtn         = document.getElementById('cardViewBtn');
+const modal               = document.getElementById('dealerModal');
+const addDealerBtn        = document.getElementById('addDealerBtn');
+const closeBtn            = document.querySelector('.close');
+const cancelBtn           = document.getElementById('cancelBtn');
+const dealerForm          = document.getElementById('dealerForm');
+const exportBtn           = document.getElementById('exportBtn');
 
-// Render dealers based on filters
+// ─── Render ───────────────────────────────────────────────────────────────────
 function renderDealers() {
-    const searchTerm = searchInput.value.toLowerCase();
+    const searchTerm  = searchInput.value.toLowerCase();
     const statusValue = statusFilter.value;
-    
-    let filteredDealers = dealers.filter(dealer => {
-        const matchesSearch = dealer.name.toLowerCase().includes(searchTerm) || 
-                             dealer.location.toLowerCase().includes(searchTerm);
-        const matchesStatus = statusValue === 'all' || dealer.status === statusValue;
-        return matchesSearch && matchesStatus;
+
+    const filtered = dealers.filter(d => {
+        const matchSearch = d.name.toLowerCase().includes(searchTerm) ||
+                            d.location.toLowerCase().includes(searchTerm);
+        const matchStatus = statusValue === 'all' || d.status === statusValue;
+        return matchSearch && matchStatus;
     });
-    
-    updateStatistics(filteredDealers);
-    
+
+    updateStatistics(filtered);
+
     if (currentView === 'table') {
-        renderTableView(filteredDealers);
+        renderTableView(filtered);
     } else {
-        renderCardView(filteredDealers);
+        renderCardView(filtered);
     }
 }
 
-// Render Table View
-function renderTableView(dealersList) {
-    dealerTableBody.innerHTML = dealersList.map(dealer => `
+function renderTableView(list) {
+    dealerTableBody.innerHTML = list.map(d => `
         <tr>
-            <td><strong>${dealer.name}</strong></td>
-            <td><i class="fas fa-map-marker-alt"></i> ${dealer.location}</td>
-            <td><i class="fas fa-rupee-sign"></i> ${dealer.sales.toLocaleString()}</td>
+            <td><strong>${d.name}</strong></td>
+            <td>${d.location}</td>
+            <td>₹ ${d.sales.toLocaleString()}</td>
             <td>
                 <label class="switch">
-                    <input type="checkbox" ${dealer.status === 'Active' ? 'checked' : ''} 
-                           onchange="toggleStatus(${dealer.id})">
+                    <input type="checkbox" ${d.status === 'Active' ? 'checked' : ''}
+                           onchange="toggleStatus(${d.id})">
                     <span class="slider round"></span>
                 </label>
-                <span class="status-text ${dealer.status === 'Active' ? 'status-active' : 'status-inactive'}">
-                    ${dealer.status}
+                <span class="status-text ${d.status === 'Active' ? 'status-active' : 'status-inactive'}">
+                    ${d.status}
                 </span>
             </td>
             <td class="action-buttons">
-                <button class="action-edit" onclick="editDealer(${dealer.id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="action-delete" onclick="deleteDealer(${dealer.id})">
-                    <i class="fas fa-trash"></i>
-                </button>
-                <button class="action-view" onclick="viewDetails(${dealer.id})">
-                    <i class="fas fa-eye"></i>
-                </button>
+                <button class="action-edit"   onclick="editDealer(${d.id})"   title="Edit">✏️</button>
+                <button class="action-delete" onclick="deleteDealer(${d.id})" title="Delete">🗑️</button>
+                <button class="action-view"   onclick="viewDetails(${d.id})"  title="View">👁️</button>
             </td>
         </tr>
     `).join('');
 }
 
-// Render Card View
-function renderCardView(dealersList) {
-    dealerCardContainer.innerHTML = dealersList.map(dealer => `
-        <div class="dealer-card ${dealer.status === 'Active' ? 'card-active' : 'card-inactive'}">
+function renderCardView(list) {
+    dealerCardContainer.innerHTML = list.map(d => `
+        <div class="dealer-card ${d.status === 'Active' ? 'card-active' : 'card-inactive'}">
             <div class="card-header">
-                <div class="dealer-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="dealer-status-badge ${dealer.status === 'Active' ? 'badge-active' : 'badge-inactive'}">
-                    ${dealer.status}
+                <div class="dealer-avatar">👤</div>
+                <div class="dealer-status-badge ${d.status === 'Active' ? 'badge-active' : 'badge-inactive'}">
+                    ${d.status}
                 </div>
             </div>
             <div class="card-body">
-                <h3>${dealer.name}</h3>
-                <p><i class="fas fa-map-marker-alt"></i> ${dealer.location}</p>
-                <p class="sales-amount"><i class="fas fa-rupee-sign"></i> ${dealer.sales.toLocaleString()}</p>
+                <h3>${d.name}</h3>
+                <p>📍 ${d.location}</p>
+                <p class="sales-amount">₹ ${d.sales.toLocaleString()}</p>
             </div>
             <div class="card-footer">
-                <button onclick="editDealer(${dealer.id})" class="card-btn edit-btn">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button onclick="viewDetails(${dealer.id})" class="card-btn view-btn-card">
-                    <i class="fas fa-eye"></i> View
-                </button>
+                <button onclick="editDealer(${d.id})"  class="card-btn edit-btn">✏️ Edit</button>
+                <button onclick="viewDetails(${d.id})" class="card-btn view-btn-card">👁️ View</button>
             </div>
         </div>
     `).join('');
 }
 
-// Update statistics
-function updateStatistics(filteredDealers) {
-    document.getElementById('totalDealers').textContent = filteredDealers.length;
-    const activeCount = filteredDealers.filter(d => d.status === 'Active').length;
-    document.getElementById('activeDealers').textContent = activeCount;
-    const totalSales = filteredDealers.reduce((sum, d) => sum + d.sales, 0);
-    document.getElementById('totalSales').textContent = `₹${totalSales.toLocaleString()}`;
-    const topDealer = filteredDealers.reduce((max, d) => d.sales > max.sales ? d : max, filteredDealers[0]);
-    document.getElementById('topPerformer').textContent = topDealer ? topDealer.name : '-';
+function updateStatistics(list) {
+    document.getElementById('totalDealers').textContent  = list.length;
+    document.getElementById('activeDealers').textContent = list.filter(d => d.status === 'Active').length;
+    const total = list.reduce((s, d) => s + d.sales, 0);
+    document.getElementById('totalSales').textContent    = `₹${total.toLocaleString()}`;
+    const top = list.reduce((max, d) => d.sales > (max?.sales ?? -1) ? d : max, null);
+    document.getElementById('topPerformer').textContent  = top ? top.name : '-';
 }
 
-// Toggle status
+// ─── Actions ──────────────────────────────────────────────────────────────────
 function toggleStatus(id) {
-    const dealer = dealers.find(d => d.id === id);
-    dealer.status = dealer.status === 'Active' ? 'Inactive' : 'Active';
+    const d   = dealers.find(x => x.id === id);
+    if (d) d.status = d.status === 'Active' ? 'Inactive' : 'Active';
     renderDealers();
 }
 
-// Edit dealer
 function editDealer(id) {
-    const dealer = dealers.find(d => d.id === id);
-    document.getElementById('modalTitle').textContent = 'Edit Dealer';
-    document.getElementById('dealerId').value = dealer.id;
-    document.getElementById('dealerName').value = dealer.name;
-    document.getElementById('dealerLocation').value = dealer.location;
-    document.getElementById('dealerSales').value = dealer.sales;
-    document.getElementById('dealerStatus').value = dealer.status;
-    modal.style.display = 'block';
+    const d = dealers.find(x => x.id === id);
+    if (!d) return;
+    document.getElementById('modalTitle').textContent    = 'Edit Dealer';
+    document.getElementById('dealerId').value            = d.id;
+    document.getElementById('dealerName').value          = d.name;
+    document.getElementById('dealerLocation').value      = d.location;
+    document.getElementById('dealerSales').value         = d.sales;
+    document.getElementById('dealerStatus').value        = d.status;
+    modal.style.display = 'flex';
 }
 
-// Delete dealer
 function deleteDealer(id) {
     if (confirm('Are you sure you want to delete this dealer?')) {
         dealers = dealers.filter(d => d.id !== id);
@@ -179,89 +211,84 @@ function deleteDealer(id) {
     }
 }
 
-// View details
 function viewDetails(id) {
-    const dealer = dealers.find(d => d.id === id);
-    alert(`📋 Dealer Details:\n\nName: ${dealer.name}\nLocation: ${dealer.location}\nSales: ₹${dealer.sales.toLocaleString()}\nStatus: ${dealer.status}`);
+    const d = dealers.find(x => x.id === id);
+    if (!d) return;
+    alert(`📋 Dealer Details\n\nName:     ${d.name}\nLocation: ${d.location}\nSales:    ₹${d.sales.toLocaleString()}\nStatus:   ${d.status}`);
 }
 
-// Export to CSV
 function exportToCSV() {
     let csv = 'Dealer Name,Location,Total Sales (₹),Status\n';
-    dealers.forEach(dealer => {
-        csv += `"${dealer.name}",${dealer.location},${dealer.sales},${dealer.status}\n`;
+    dealers.forEach(d => {
+        csv += `"${d.name}","${d.location}",${d.sales},"${d.status}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
     a.download = 'dealers_data.csv';
     a.click();
     URL.revokeObjectURL(url);
 }
 
-// Add/Edit dealer form submit
-dealerForm.addEventListener('submit', (e) => {
+// ─── Form Submit (Add / Edit) ─────────────────────────────────────────────────
+dealerForm.addEventListener('submit', e => {
     e.preventDefault();
-    const id = document.getElementById('dealerId').value;
-    const name = document.getElementById('dealerName').value;
-    const location = document.getElementById('dealerLocation').value;
-    const sales = parseInt(document.getElementById('dealerSales').value);
-    const status = document.getElementById('dealerStatus').value;
-    
+
+    const id       = document.getElementById('dealerId').value;
+    const name     = document.getElementById('dealerName').value.trim();
+    const location = document.getElementById('dealerLocation').value.trim();
+    const sales    = parseInt(document.getElementById('dealerSales').value, 10);
+    const status   = document.getElementById('dealerStatus').value;
+
     if (id) {
-        // Edit existing
-        const index = dealers.findIndex(d => d.id === parseInt(id));
-        dealers[index] = { ...dealers[index], name, location, sales, status };
+        // Update existing dealer
+        const idx = dealers.findIndex(d => d.id === parseInt(id, 10));
+        if (idx !== -1) dealers[idx] = { ...dealers[idx], name, location, sales, status };
     } else {
-        // Add new
+        // Add new dealer
         dealers.push({ id: nextId++, name, location, sales, status });
     }
-    
+
     modal.style.display = 'none';
     dealerForm.reset();
     document.getElementById('dealerId').value = '';
     renderDealers();
 });
 
-// Event listeners
-searchInput.addEventListener('input', renderDealers);
+// ─── Event Listeners ──────────────────────────────────────────────────────────
+searchInput.addEventListener('input',  renderDealers);
 statusFilter.addEventListener('change', renderDealers);
+
 tableViewBtn.addEventListener('click', () => {
     currentView = 'table';
     document.getElementById('tableView').style.display = 'block';
-    document.getElementById('cardView').style.display = 'none';
+    document.getElementById('cardView').style.display  = 'none';
     tableViewBtn.classList.add('active');
     cardViewBtn.classList.remove('active');
     renderDealers();
 });
+
 cardViewBtn.addEventListener('click', () => {
     currentView = 'card';
     document.getElementById('tableView').style.display = 'none';
-    document.getElementById('cardView').style.display = 'block';
+    document.getElementById('cardView').style.display  = 'block';
     cardViewBtn.classList.add('active');
     tableViewBtn.classList.remove('active');
     renderDealers();
 });
+
 addDealerBtn.onclick = () => {
     document.getElementById('modalTitle').textContent = 'Add New Dealer';
     dealerForm.reset();
     document.getElementById('dealerId').value = '';
-    modal.style.display = 'block';
+    modal.style.display = 'flex';
 };
-closeBtn.onclick = () => modal.style.display = 'none';
-cancelBtn.onclick = () => modal.style.display = 'none';
-window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+closeBtn.onclick  = () => { modal.style.display = 'none'; };
+cancelBtn.onclick = () => { modal.style.display = 'none'; };
+window.onclick    = e  => { if (e.target === modal) modal.style.display = 'none'; };
 exportBtn.onclick = exportToCSV;
 
-// Initial render with API connection
+// ─── Init ─────────────────────────────────────────────────────────────────────
 loadDealersFromAPI();
-document.getElementById("searchInput").addEventListener("keyup", function () {
-    let value = this.value.toUpperCase();
-    let rows = document.querySelectorAll("#dealerTable tbody tr");
-
-    rows.forEach(row => {
-        let dealerId = row.cells[0].textContent.toUpperCase();
-        row.style.display = dealerId.includes(value) ? "" : "none";
-    });
-});

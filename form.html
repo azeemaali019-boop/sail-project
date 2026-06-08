@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="pp.css">
-  <!-- <meta charset="UTF-8" /> -->
-  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"/> -->
   <title>SAIL Login Page</title>
-
   <style>
     * {
       margin: 0;
@@ -71,6 +67,13 @@
       align-items: center;
       font-size: 60px;
       font-weight: bold;
+      overflow: hidden;
+    }
+
+    .logo-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .right-panel {
@@ -148,6 +151,14 @@
       background: #004080;
     }
 
+    .error-msg {
+      color: #dc2626;
+      font-size: 13px;
+      margin-top: -10px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
     .footer {
       margin-top: 25px;
       text-align: center;
@@ -179,49 +190,39 @@
 </head>
 
 <body>
-
   <div class="container">
-
     <div class="left-panel">
       <h1>SAIL</h1>
-
       <h2>Sales Flow & Financial Tracking System</h2>
-
       <p>
         Monitor dealer purchases, distributor sales,
         inventory flow, and financial transactions
         across the SAIL distribution network.
       </p>
-
-      <div class="logo-circle" >
-       <img src="SAIL_Logo.png" alt="logo-circle">
+      <div class="logo-circle">
+        <img src="SAIL_Logo.png" alt="SAIL Logo" onerror="this.style.display='none';this.parentElement.textContent='SAIL'">
       </div>
     </div>
 
     <div class="right-panel">
-
-      <h2>Welcome to SAIL
-        
-      </h2>
-
+      <h2>Welcome to SAIL</h2>
       <p>Login to continue to dashboard</p>
 
-      <form id="loginForm" action="dashboard.html" method="get">
-
+      <!-- NOTE: No action= attribute; JS handles navigation -->
+      <form id="loginForm">
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" placeholder="Enter your email" required>
+          <input type="email" id="emailInput" placeholder="Enter your email" required>
         </div>
 
         <div class="form-group">
           <label>Password</label>
-          <input type="password" placeholder="Enter your password" required>
+          <input type="password" id="passwordInput" placeholder="Enter your password" required>
         </div>
 
         <div class="form-group">
           <label>Login Role</label>
-
-          <select>
+          <select id="roleSelect">
             <option>SAIL Admin</option>
             <option>Dealer</option>
             <option>Distributor</option>
@@ -232,31 +233,44 @@
           <label>
             <input type="checkbox"> Remember Me
           </label>
-
           <a href="#">Forgot Password?</a>
         </div>
 
-        <button type="submit" class="login-btn">
-          Login
-        </button>
+        <p class="error-msg" id="errorMsg">Invalid credentials. Please try again.</p>
 
+        <button type="submit" class="login-btn">Login</button>
       </form>
 
       <div class="footer">
         © 2026 SAIL Financial Tracking System
       </div>
-
     </div>
-
   </div>
 
   <script>
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-      loginForm.addEventListener('submit', () => {
-        localStorage.setItem('loggedIn', 'true');
-      });
-    }
+    // Clear any stale session on landing at login page
+    localStorage.removeItem('loggedIn');
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      // Always prevent default — we handle navigation manually
+      e.preventDefault();
+
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+
+      // Basic validation (expand with real auth as needed)
+      if (!email || !password) {
+        document.getElementById('errorMsg').style.display = 'block';
+        return;
+      }
+
+      // Set login flag BEFORE navigating
+      localStorage.setItem('loggedIn', 'true');
+      localStorage.setItem('userRole', document.getElementById('roleSelect').value);
+
+      // Now navigate
+      window.location.href = 'dashboard.html';
+    });
   </script>
 </body>
 </html>
