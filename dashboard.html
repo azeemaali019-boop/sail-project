@@ -6,13 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAIL Dashboard</title>
 
-    <link rel="stylesheet" href="p.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- <script src="p.js"></script> -->
 
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-
+ <!-- <script src="p.js"></script>  -->
     <div class="container">
 
         <!-- Sidebar -->
@@ -22,13 +23,13 @@
             <h2>SAIL</h2>
 
             <ul>
-                <li>Dashboard</li>
-                <li>Dealers</li>
-                <li>Distributors</li>
-                <li>Inventory</li>
-                <li>Financial Ledger</li>
-                <li>Reports</li>
-                <li>Logout</li>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="dealer.html" class="nav-link">Dealers</a></li>
+                <li><a href="distributors.html" class="nav-link">Distributors</a></li>
+                <li><a href="inventory.html" class="nav-link">Inventory</a></li>
+                <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
+                <li><a href="reports.html" class="nav-link">Reports</a></li>
+                <li><a href="form.html" class="nav-link">Logout</a></li>
             </ul>
 
         </div>
@@ -130,6 +131,32 @@
         </div>
 
     </div>
+
+    <script>
+        const sidebarLinks = document.querySelectorAll('.sidebar ul li a');
+
+        function clearActiveLink() {
+            sidebarLinks.forEach(link => link.classList.remove('active'));
+        }
+
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', event => {
+                const target = event.currentTarget.dataset.target;
+
+                clearActiveLink();
+                event.currentTarget.classList.add('active');
+
+                if (target === 'distributors' || target === 'inventory' || target === 'financial' || target === 'reports') {
+                    event.preventDefault();
+                    alert('This section is under construction. Coming soon!');
+                }
+
+                if (target === 'logout') {
+                    window.location.href = 'form.html';
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

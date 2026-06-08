@@ -206,7 +206,7 @@
 
       <p>Login to continue to dashboard</p>
 
-      <form>
+      <form id="loginForm" action="dashboard.html" method="get">
 
         <div class="form-group">
           <label>Email Address</label>
@@ -250,5 +250,13 @@
 
   </div>
 
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', () => {
+        localStorage.setItem('loggedIn', 'true');
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAIL Financial Ledger</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>SAIL</h2>
+            <ul>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="dealer.html" class="nav-link">Dealers</a></li>
+                <li><a href="distributors.html" class="nav-link">Distributors</a></li>
+                <li><a href="inventory.html" class="nav-link">Inventory</a></li>
+                <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
+                <li><a href="reports.html" class="nav-link">Reports</a></li>
+                <li><a href="form.html" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="topbar">
+                <h1>Financial Ledger</h1>
+                <div class="profile">Admin</div>
+            </div>
+            <div class="table-section">
+                <h2>Financial Overview</h2>
+                <p>Review payments, pending invoices, and ledger summaries for the sales network.</p>
+                <p>This page can be enhanced with charts, transaction reports, and reconciliation tools.</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        const sidebarLinks = document.querySelectorAll('.sidebar ul li a');
+        const currentPage = window.location.pathname.split('/').pop() || 'financial.html';
+        sidebarLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>
