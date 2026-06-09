@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
+<body data-page="reports">
 <div class="container">
   <div class="sidebar">
     <h2>SAIL</h2>
@@ -27,13 +27,53 @@
       <div class="profile" id="profileLabel">Admin</div>
     </div>
     <div class="table-section">
-      <h2>Reports Overview</h2>
-      <p style="margin-top:12px;color:#64748b;">Generate sales, payment, and inventory reports for your team.</p>
-      <p style="margin-top:8px;color:#94a3b8;font-size:13px;">🚧 Reporting widgets and dashboard charts coming soon.</p>
+      <div class="page-header">
+        <h2>Reports Overview</h2>
+        <div class="action-group">
+          <button id="exportBtn" class="btn-secondary">Export CSV</button>
+        </div>
+      </div>
+
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <h3>Total Sales</h3>
+            <p id="reportTotalSales">-</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🧾</div>
+          <div class="stat-info">
+            <h3>Transactions</h3>
+            <p id="reportTotalTransactions">-</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔎</div>
+          <div class="stat-info">
+            <h3>Insights</h3>
+            <p id="reportInsights">-</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="innovative-table">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Title</th><th>Value</th></tr>
+          </thead>
+          <tbody id="reportsTableBody">
+            <tr><td colspan="3" style="text-align:center;padding:30px;color:#94a3b8;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>
 <script src="auth.js"></script>
+<script src="app_api.js"></script>
 <script>
   var role = localStorage.getItem('userRole');
   if (role) document.getElementById('profileLabel').textContent = role;

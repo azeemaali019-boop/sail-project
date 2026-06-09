@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
+<body data-page="distributors">
 <div class="container">
   <div class="sidebar">
     <h2>SAIL</h2>
@@ -27,13 +27,64 @@
       <div class="profile" id="profileLabel">Admin</div>
     </div>
     <div class="table-section">
-      <h2>Distributors Overview</h2>
-      <p style="margin-top:12px;color:#64748b;">Use this section to review distributor performance, track inventory allocation, and manage sales agreements.</p>
-      <p style="margin-top:8px;color:#94a3b8;font-size:13px;">🚧 Full distributor table coming soon.</p>
+      <div class="page-header">
+        <h2>Distributors Overview</h2>
+        <div class="action-group">
+          <button id="exportBtn" class="btn-secondary">Export CSV</button>
+          <button class="btn-primary" onclick="location.href='dealer.html'">Add Distributor</button>
+        </div>
+      </div>
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-info">
+            <h3>Total Distributors</h3>
+            <p id="totalDistributors">-</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-info">
+            <h3>Active</h3>
+            <p id="activeDistributors">-</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-info">
+            <h3>Top Performer</h3>
+            <p id="topDistributor">-</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-filter-bar">
+        <div class="search-box"><i class="fa fa-search"></i><input id="searchInput" placeholder="Search name or location"></div>
+        <div class="filter-group">
+          <select id="statusFilter">
+            <option value="all">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="innovative-table">
+        <table>
+          <thead>
+            <tr><th>S.No</th><th>Name</th><th>Contact</th><th>Location</th><th>Status</th></tr>
+          </thead>
+          <tbody id="distributorTableBody">
+            <tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>
 <script src="auth.js"></script>
+<script src="app_api.js"></script>
 <script>
   var role = localStorage.getItem('userRole');
   if (role) document.getElementById('profileLabel').textContent = role;

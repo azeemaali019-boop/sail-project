@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
+<body data-page="inventory">
 <div class="container">
   <div class="sidebar">
     <h2>SAIL</h2>
@@ -27,13 +27,63 @@
       <div class="profile" id="profileLabel">Admin</div>
     </div>
     <div class="table-section">
-      <h2>Inventory Status</h2>
-      <p style="margin-top:12px;color:#64748b;">Track stock levels, warehouse movements, and product availability in one place.</p>
-      <p style="margin-top:8px;color:#94a3b8;font-size:13px;">🚧 Live stock charts and filters coming soon.</p>
+      <div class="page-header">
+        <h2>Inventory Status</h2>
+        <div class="action-group">
+          <button id="exportBtn" class="btn-secondary">Export CSV</button>
+          <button class="btn-primary" onclick="location.href='dealer.html'">Add Stock</button>
+        </div>
+      </div>
+
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-info">
+            <h3>Total SKUs</h3>
+            <p id="totalSKUs">-</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-info">
+            <h3>Low Stock</h3>
+            <p id="lowStockCount">-</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏬</div>
+          <div class="stat-info">
+            <h3>Warehouses</h3>
+            <p id="warehouseCount">-</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-filter-bar">
+        <div class="search-box"><i class="fa fa-search"></i><input id="searchInput" placeholder="Search product or SKU"></div>
+        <div class="filter-group">
+          <select id="warehouseFilter">
+            <option value="all">All Warehouses</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="innovative-table">
+        <table>
+          <thead>
+            <tr><th>SKU</th><th>Product</th><th>Warehouse</th><th>Stock</th><th>Reorder Level</th></tr>
+          </thead>
+          <tbody id="inventoryTableBody">
+            <tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>
 <script src="auth.js"></script>
+<script src="app_api.js"></script>
 <script>
   var role = localStorage.getItem('userRole');
   if (role) document.getElementById('profileLabel').textContent = role;
