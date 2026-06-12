@@ -6,19 +6,22 @@
   <title>SAIL Inventory</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="auth.js"></script>
+  <script src="ai.js"></script>
 </head>
-<body data-page="inventory">
+<body>
 <div class="container">
   <div class="sidebar">
     <h2>SAIL</h2>
     <ul>
-      <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-      <li><a href="dealer.html" class="nav-link">Dealers</a></li>
-      <li><a href="distributors.html" class="nav-link">Distributors</a></li>
-      <li><a href="inventory.html" class="nav-link">Inventory</a></li>
-      <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
-      <li><a href="reports.html" class="nav-link">Reports</a></li>
-      <li><a href="form.html" class="nav-link">Logout</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="dealer.html">Dealers</a></li>
+      <li><a href="distributors.html">Distributors</a></li>
+      <li><a href="inventory.html">Inventory</a></li>
+      <li><a href="financial.html">Financial Ledger</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="ai.html">🤖 AI Assistant</a></li>
+      <li><a href="form.html">Logout</a></li>
     </ul>
   </div>
   <div class="main-content">
@@ -26,67 +29,251 @@
       <h1>Inventory Dashboard</h1>
       <div class="profile" id="profileLabel">Admin</div>
     </div>
-    <div class="table-section">
-      <div class="page-header">
-        <h2>Inventory Status</h2>
-        <div class="action-group">
-          <button id="exportBtn" class="btn-secondary">Export CSV</button>
-          <button class="btn-primary" onclick="location.href='dealer.html'">Add Stock</button>
-        </div>
-      </div>
 
-      <div class="stats-container">
-        <div class="stat-card">
-          <div class="stat-icon">📦</div>
-          <div class="stat-info">
-            <h3>Total SKUs</h3>
-            <p id="totalSKUs">-</p>
+    <div class="stats-container">
+      <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-info"><h3>Total Products</h3><p id="statProducts">0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-info"><h3>In Stock</h3><p id="statInStock">0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-info"><h3>Low Stock</h3><p id="statLow">0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">💎</div><div class="stat-info"><h3>Total Value</h3><p id="statValue">₹0</p></div></div>
+    </div>
+
+    <div class="page-header">
+      <h2>Stock Items</h2>
+      <div class="action-group">
+        <button id="addBtn" class="btn-primary">+ Add Item</button>
+        <button id="exportBtn" class="btn-secondary">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="search-filter-bar">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search by product name or category...">
+      </div>
+      <div class="filter-group">
+        <select id="statusFilter">
+          <option value="all">All Status</option>
+          <option value="In Stock">In Stock</option>
+          <option value="Low Stock">Low Stock</option>
+          <option value="Out of Stock">Out of Stock</option>
+        </select>
+        <select id="categoryFilter">
+          <option value="all">All Categories</option>
+          <option value="Rods">Rods</option>
+          <option value="Pipes">Pipes</option>
+          <option value="Sheets">Sheets</option>
+          <option value="Bars">Bars</option>
+          <option value="Coils">Coils</option>
+          <option value="Angles">Angles</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="invAIAnchor"></div>
+    <div class="table-section" style="padding:0;overflow:hidden;">
+      <table class="innovative-table">
+        <thead>
+          <tr><th>#</th><th>Product Name</th><th>Category</th><th>Quantity</th><th>Unit</th><th>Unit Price</th><th>Total Value</th><th>Warehouse</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h2 id="modalTitle">Add Inventory Item</h2>
+          <span id="closeModal" style="font-size:26px;cursor:pointer;color:#94a3b8;">&times;</span>
+        </div>
+        <form id="invForm">
+          <input type="hidden" id="invId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="form-group" style="grid-column:1/-1;"><label>Product Name</label><input type="text" id="invName" required placeholder="e.g. Steel Rod 12mm"></div>
+            <div class="form-group"><label>Category</label>
+              <select id="invCategory">
+                <option value="Rods">Rods</option><option value="Pipes">Pipes</option>
+                <option value="Sheets">Sheets</option><option value="Bars">Bars</option>
+                <option value="Coils">Coils</option><option value="Angles">Angles</option><option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Quantity</label><input type="number" id="invQty" min="0" value="0" required></div>
+            <div class="form-group"><label>Unit</label>
+              <select id="invUnit"><option value="Units">Units</option><option value="Kg">Kg</option><option value="Sheets">Sheets</option><option value="Rolls">Rolls</option><option value="Tons">Tons</option></select>
+            </div>
+            <div class="form-group"><label>Unit Price (₹)</label><input type="number" id="invPrice" min="0" step="0.01" value="0" required></div>
+            <div class="form-group"><label>Warehouse</label>
+              <select id="invWarehouse"><option value="Warehouse A">Warehouse A</option><option value="Warehouse B">Warehouse B</option><option value="Warehouse C">Warehouse C</option></select>
+            </div>
+            <div class="form-group"><label>Status</label>
+              <select id="invStatus"><option value="In Stock">In Stock</option><option value="Low Stock">Low Stock</option><option value="Out of Stock">Out of Stock</option></select>
+            </div>
           </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">⚠️</div>
-          <div class="stat-info">
-            <h3>Low Stock</h3>
-            <p id="lowStockCount">-</p>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+            <button type="button" id="cancelBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save Item</button>
           </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">🏬</div>
-          <div class="stat-info">
-            <h3>Warehouses</h3>
-            <p id="warehouseCount">-</p>
-          </div>
-        </div>
+        </form>
       </div>
-
-      <div class="search-filter-bar">
-        <div class="search-box"><i class="fa fa-search"></i><input id="searchInput" placeholder="Search product or SKU"></div>
-        <div class="filter-group">
-          <select id="warehouseFilter">
-            <option value="all">All Warehouses</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="innovative-table">
-        <table>
-          <thead>
-            <tr><th>SKU</th><th>Product</th><th>Warehouse</th><th>Stock</th><th>Reorder Level</th></tr>
-          </thead>
-          <tbody id="inventoryTableBody">
-            <tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-
     </div>
   </div>
 </div>
-<script src="auth.js"></script>
-<script src="app_api.js"></script>
 <script>
-  var role = localStorage.getItem('userRole');
-  if (role) document.getElementById('profileLabel').textContent = role;
+const API = 'http://127.0.0.1:5000/api/inventory';
+let data = [];
+
+async function load() {
+  try { const r=await fetch(API); data=await r.json(); }
+  catch(e){
+    data=[
+      {id:1,product_name:'Steel Rod 12mm', category:'Rods',  quantity:5000,unit:'Kg',    unit_price:45,  warehouse:'Warehouse A',status:'In Stock'},
+      {id:2,product_name:'Steel Pipe 2in', category:'Pipes', quantity:2000,unit:'Units', unit_price:120, warehouse:'Warehouse B',status:'In Stock'},
+      {id:3,product_name:'Steel Sheet 4mm',category:'Sheets',quantity:800, unit:'Sheets',unit_price:350, warehouse:'Warehouse A',status:'Low Stock'},
+      {id:4,product_name:'TMT Bar Fe500',  category:'Bars',  quantity:3200,unit:'Kg',    unit_price:52,  warehouse:'Warehouse C',status:'In Stock'},
+      {id:5,product_name:'HR Coil 3mm',    category:'Coils', quantity:150, unit:'Rolls', unit_price:8500,warehouse:'Warehouse B',status:'Low Stock'},
+      {id:6,product_name:'MS Angle 50x50', category:'Angles',quantity:1200,unit:'Kg',    unit_price:48,  warehouse:'Warehouse A',status:'In Stock'},
+    ];
+  }
+  render();
+}
+
+function filtered() {
+  const term = document.getElementById('searchInput').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+  const cat  = document.getElementById('categoryFilter').value;
+  return data.filter(d=>
+    (d.product_name.toLowerCase().includes(term)||(d.category||'').toLowerCase().includes(term))&&
+    (status==='all'||d.status===status)&&(cat==='all'||d.category===cat)
+  );
+}
+
+function render() {
+  const list = filtered();
+  document.getElementById('statProducts').textContent = list.length;
+  document.getElementById('statInStock').textContent  = list.filter(d=>d.status==='In Stock').length;
+  document.getElementById('statLow').textContent      = list.filter(d=>d.status==='Low Stock').length;
+  const val = list.reduce((s,d)=>s+(d.quantity*d.unit_price),0);
+  document.getElementById('statValue').textContent    = '₹'+val.toLocaleString();
+  const statusColor = {
+    'In Stock':'status-active', 'Low Stock':'status-warning', 'Out of Stock':'status-inactive'
+  };
+  document.getElementById('tableBody').innerHTML = list.length ? list.map((d,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${d.product_name}</strong></td>
+      <td><span class="cat-badge">${d.category||'-'}</span></td>
+      <td><strong>${Number(d.quantity).toLocaleString()}</strong></td>
+      <td>${d.unit}</td>
+      <td>₹ ${Number(d.unit_price).toLocaleString()}</td>
+      <td><strong>₹ ${(d.quantity*d.unit_price).toLocaleString()}</strong></td>
+      <td>🏭 ${d.warehouse||'-'}</td>
+      <td><span class="status-text ${statusColor[d.status]||'status-inactive'}">${d.status}</span></td>
+      <td class="action-buttons">
+        <button onclick="editRow(${d.id})" title="Edit">✏️</button>
+        <button onclick="deleteRow(${d.id})" title="Delete">🗑️</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="10" style="text-align:center;padding:30px;color:#94a3b8;">No items found.</td></tr>';
+}
+
+async function deleteRow(id) {
+  if(!confirm('Delete this item?')) return;
+  try { await fetch(API+'/'+id,{method:'DELETE'}); } catch(e){}
+  data=data.filter(d=>d.id!==id); render();
+}
+
+function editRow(id) {
+  const d=data.find(x=>x.id===id); if(!d) return;
+  document.getElementById('modalTitle').textContent = 'Edit Item';
+  document.getElementById('invId').value       = d.id;
+  document.getElementById('invName').value     = d.product_name;
+  document.getElementById('invCategory').value = d.category||'Rods';
+  document.getElementById('invQty').value      = d.quantity;
+  document.getElementById('invUnit').value     = d.unit;
+  document.getElementById('invPrice').value    = d.unit_price;
+  document.getElementById('invWarehouse').value= d.warehouse||'Warehouse A';
+  document.getElementById('invStatus').value   = d.status;
+  openModal();
+}
+
+function openModal()  { document.getElementById('modal').style.display='flex'; }
+function closeModal() { document.getElementById('modal').style.display='none'; document.getElementById('invForm').reset(); document.getElementById('invId').value=''; }
+
+document.getElementById('invForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id = document.getElementById('invId').value;
+  const obj = {
+    product_name: document.getElementById('invName').value.trim(),
+    category:     document.getElementById('invCategory').value,
+    quantity:     parseInt(document.getElementById('invQty').value)||0,
+    unit:         document.getElementById('invUnit').value,
+    unit_price:   parseFloat(document.getElementById('invPrice').value)||0,
+    warehouse:    document.getElementById('invWarehouse').value,
+    status:       document.getElementById('invStatus').value
+  };
+  if(id) {
+    try { await fetch(API+'/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)}); } catch(e){}
+    const idx=data.findIndex(d=>d.id===parseInt(id)); if(idx!==-1) data[idx]={...data[idx],...obj};
+  } else {
+    try { const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)}); const nd=await r.json(); data.push({...obj,id:nd.id}); }
+    catch(e){ data.push({...obj,id:Date.now()}); }
+  }
+  closeModal(); render();
+});
+
+document.getElementById('searchInput').addEventListener('input',render);
+document.getElementById('statusFilter').addEventListener('change',render);
+document.getElementById('categoryFilter').addEventListener('change',render);
+document.getElementById('addBtn').addEventListener('click',()=>{ document.getElementById('modalTitle').textContent='Add Item'; closeModal(); openModal(); });
+document.getElementById('closeModal').addEventListener('click',closeModal);
+document.getElementById('cancelBtn').addEventListener('click',closeModal);
+document.getElementById('modal').addEventListener('click',e=>{ if(e.target===document.getElementById('modal')) closeModal(); });
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  let csv='Product,Category,Quantity,Unit,Unit Price,Total Value,Warehouse,Status\n';
+  data.forEach(d=>{ csv+=`"${d.product_name}","${d.category||''}",${d.quantity},"${d.unit}",${d.unit_price},${d.quantity*d.unit_price},"${d.warehouse||''}","${d.status}"\n`; });
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='inventory.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+});
+
+var role=localStorage.getItem('userRole'); if(role) document.getElementById('profileLabel').textContent=role;
+load();
+</script>
+<style>
+.cat-badge{background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.status-warning{background:#fef3c7;color:#92400e;}
+</style>
+
+<script>
+// AI Inventory Alert Box
+(function(){
+  var anchor = document.getElementById('invAIAnchor');
+  if(!anchor) return;
+  var box = document.createElement('div');
+  box.style.cssText = 'background:white;border-radius:15px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,0.08);border-left:4px solid #f59e0b;';
+  box.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;">'
+    + '<h3 style="color:#1e293b;font-size:15px;">🤖 AI Inventory Alerts</h3>'
+    + '<button id="invAIBtn" style="background:linear-gradient(135deg,#f59e0b,#ef4444);color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">⚠️ Check Stock with AI</button>'
+    + '</div>'
+    + '<div id="invAIResult" style="margin-top:12px;color:#475569;font-size:14px;line-height:1.7;display:none;"></div>';
+  anchor.appendChild(box);
+
+  document.getElementById('invAIBtn').addEventListener('click', async function() {
+    var btn=this, result=document.getElementById('invAIResult');
+    btn.textContent='⏳ Analyzing...'; btn.disabled=true; result.style.display='block';
+    result.innerHTML='<span style="color:#f59e0b;">AI is checking stock levels...</span>';
+    try {
+      var text = await getInventoryAlert(data);
+      result.innerHTML = text.split('\n').filter(function(l){return l.trim();}).map(function(l){
+        return (l.startsWith('-')||l.startsWith('•')||l.startsWith('*'))
+          ? '<div style="padding:4px 0 4px 14px;border-left:3px solid #f59e0b;margin:5px 0;">'+l.replace(/^[-•*]\s*/,'')+'</div>'
+          : '<p style="margin:5px 0;">'+l+'</p>';
+      }).join('');
+      btn.textContent='⚠️ Refresh';
+    } catch(e) {
+      result.innerHTML='<span style="color:#ef4444;">⚠️ AI unavailable.</span>';
+      btn.textContent='⚠️ Retry';
+    }
+    btn.disabled=false;
+  });
+})();
 </script>
 </body>
 </html>

@@ -1,32 +1,44 @@
-// ─── auth.js ─────────────────────────────────────────────────────────────────
-// Shared across all protected pages. Include BEFORE page-specific scripts.
+// auth.js — included by every protected page (NOT form.html)
+// Runs immediately: if not logged in, kick to login page.
 
-// 1. Auth guard — redirect to login if not logged in
-(function () {
-    const page = window.location.pathname.split('/').pop();
-    if (page !== 'form.html' && localStorage.getItem('loggedIn') !== 'true') {
-        window.location.href = 'form.html';
-    }
-})();
+(function() {
+  var page = window.location.pathname.split('/').pop();
+  // Allow blank path (root) to pass through — Live Server may serve index
+  if (page === '' || page === 'form.html') return;
 
-// 2. Sidebar: highlight active link + handle logout
-document.addEventListener('DOMContentLoaded', function () {
-    const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+  if (localStorage.getItem('loggedIn') !== 'true') {
+    window.location.replace('form.html');
+    return; // stop rest of script executing
+  }
 
-    document.querySelectorAll('.sidebar ul li a').forEach(function (link) {
-        // Highlight current page
-        if (link.getAttribute('href') === currentPage) {
-            link.classList.add('active');
-        }
+  // Once DOM is ready: highlight sidebar + wire logout
+  document.addEventListener('DOMContentLoaded', function() {
+    var current = window.location.pathname.split('/').pop() || 'dashboard.html';
 
-        // Logout link — clear session then navigate
-        if (link.getAttribute('href') === 'form.html') {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                localStorage.removeItem('loggedIn');
-                localStorage.removeItem('userRole');
-                window.location.href = 'form.html';
-            });
-        }
+    document.querySelectorAll('.sidebar ul li a').forEach(function(link) {
+      var href = link.getAttribute('href');
+
+      // Highlight active page
+      if (href === current) {
+        link.classList.add('active');
+      }
+
+      // Logout — clear session then go to login
+      if (href === 'form.html') {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          localStorage.removeItem('loggedIn');
+          localStorage.removeItem('userRole');
+          window.location.href = 'form.html';
+        });
+      }
     });
-});
+
+    // Show role in profile badge if element exists
+    var badge = document.getElementById('profileLabel');
+    if (badge) {
+      var role = localStorage.getItem('userRole');
+      if (role) badge.textContent = role;
+    }
+  });
+})();

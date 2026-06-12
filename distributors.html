@@ -6,88 +6,236 @@
   <title>SAIL Distributors</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="auth.js"></script>
 </head>
-<body data-page="distributors">
+<body>
 <div class="container">
+
   <div class="sidebar">
     <h2>SAIL</h2>
     <ul>
-      <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-      <li><a href="dealer.html" class="nav-link">Dealers</a></li>
-      <li><a href="distributors.html" class="nav-link">Distributors</a></li>
-      <li><a href="inventory.html" class="nav-link">Inventory</a></li>
-      <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
-      <li><a href="reports.html" class="nav-link">Reports</a></li>
-      <li><a href="form.html" class="nav-link">Logout</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="dealer.html">Dealers</a></li>
+      <li><a href="distributors.html">Distributors</a></li>
+      <li><a href="inventory.html">Inventory</a></li>
+      <li><a href="financial.html">Financial Ledger</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="ai.html">🤖 AI Assistant</a></li>
+      <li><a href="form.html">Logout</a></li>
     </ul>
   </div>
+
   <div class="main-content">
     <div class="topbar">
       <h1>Distributor Management</h1>
       <div class="profile" id="profileLabel">Admin</div>
     </div>
-    <div class="table-section">
-      <div class="page-header">
-        <h2>Distributors Overview</h2>
-        <div class="action-group">
-          <button id="exportBtn" class="btn-secondary">Export CSV</button>
-          <button class="btn-primary" onclick="location.href='dealer.html'">Add Distributor</button>
-        </div>
-      </div>
-      <div class="stats-container">
-        <div class="stat-card">
-          <div class="stat-icon">📦</div>
-          <div class="stat-info">
-            <h3>Total Distributors</h3>
-            <p id="totalDistributors">-</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">✅</div>
-          <div class="stat-info">
-            <h3>Active</h3>
-            <p id="activeDistributors">-</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">📈</div>
-          <div class="stat-info">
-            <h3>Top Performer</h3>
-            <p id="topDistributor">-</p>
-          </div>
-        </div>
-      </div>
 
-      <div class="search-filter-bar">
-        <div class="search-box"><i class="fa fa-search"></i><input id="searchInput" placeholder="Search name or location"></div>
-        <div class="filter-group">
-          <select id="statusFilter">
-            <option value="all">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="innovative-table">
-        <table>
-          <thead>
-            <tr><th>S.No</th><th>Name</th><th>Contact</th><th>Location</th><th>Status</th></tr>
-          </thead>
-          <tbody id="distributorTableBody">
-            <tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-
+    <!-- Summary Cards (same .cards class as dashboard) -->
+    <div class="cards">
+      <div class="card"><h3>Total Distributors</h3><p id="cTotal">0</p></div>
+      <div class="card"><h3>Active Distributors</h3><p id="cActive">0</p></div>
+      <div class="card"><h3>Total Sales</h3><p id="cSales">₹0</p></div>
+      <div class="card"><h3>Top Distributor</h3><p id="cTop" style="font-size:16px;">-</p></div>
     </div>
+
+    <!-- Action bar -->
+    <div class="page-header">
+      <h2>Registered Distributors</h2>
+      <div class="action-group">
+        <button id="addBtn" class="btn-primary">+ Add Distributor</button>
+        <button id="exportBtn" class="btn-secondary">Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Search & filter -->
+    <div class="search-filter-bar">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search by name, location or region...">
+      </div>
+      <div class="filter-group">
+        <select id="statusFilter">
+          <option value="all">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <select id="regionFilter">
+          <option value="all">All Regions</option>
+          <option value="North">North</option>
+          <option value="South">South</option>
+          <option value="East">East</option>
+          <option value="West">West</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table (same .table-section as dashboard) -->
+    <div class="table-section">
+      <h2>Distributor Records</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Name</th><th>Location</th><th>Region</th>
+            <th>Contact</th><th>Email</th><th>Sales</th><th>Commission</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h2 id="modalTitle">Add Distributor</h2>
+          <span id="closeModal" class="close">&times;</span>
+        </div>
+        <form id="theForm">
+          <input type="hidden" id="recId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="form-group"><label>Name</label><input type="text" id="fName" required placeholder="Distributor name"></div>
+            <div class="form-group"><label>Location</label><input type="text" id="fLocation" required placeholder="City"></div>
+            <div class="form-group"><label>Region</label>
+              <select id="fRegion"><option value="North">North</option><option value="South">South</option><option value="East">East</option><option value="West">West</option></select>
+            </div>
+            <div class="form-group"><label>Contact No.</label><input type="text" id="fContact" placeholder="Phone number"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="fEmail" placeholder="email@example.com"></div>
+            <div class="form-group"><label>Sales (₹)</label><input type="number" id="fSales" min="0" value="0"></div>
+            <div class="form-group"><label>Commission (%)</label><input type="number" id="fCommission" min="0" max="100" step="0.5" value="5"></div>
+            <div class="form-group"><label>Status</label>
+              <select id="fStatus"><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+            <button type="button" id="cancelBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </div>
 </div>
-<script src="auth.js"></script>
-<script src="app_api.js"></script>
 <script>
-  var role = localStorage.getItem('userRole');
-  if (role) document.getElementById('profileLabel').textContent = role;
+const API = 'http://127.0.0.1:5000/api/distributors';
+let data = [];
+
+const FALLBACK = [
+  {id:1,name:'Dist Alpha',location:'Chennai',region:'South',contact:'9876543210',email:'alpha@dist.com',sales:200000,commission:6,status:'Active'},
+  {id:2,name:'Dist Beta',location:'Kolkata',region:'East',contact:'9123456780',email:'beta@dist.com',sales:150000,commission:5.5,status:'Active'},
+  {id:3,name:'Dist Gamma',location:'Pune',region:'West',contact:'9988776655',email:'gamma@dist.com',sales:90000,commission:4,status:'Inactive'},
+  {id:4,name:'Dist Delta',location:'Hyderabad',region:'South',contact:'9001122334',email:'delta@dist.com',sales:175000,commission:5,status:'Active'},
+];
+
+async function load() {
+  try { const r=await fetch(API); data=await r.json(); }
+  catch(e){ data=FALLBACK.slice(); }
+  render();
+}
+
+function getFiltered() {
+  const term=document.getElementById('searchInput').value.toLowerCase();
+  const st=document.getElementById('statusFilter').value;
+  const rg=document.getElementById('regionFilter').value;
+  return data.filter(d=>
+    (d.name.toLowerCase().includes(term)||d.location.toLowerCase().includes(term)||(d.region||'').toLowerCase().includes(term))
+    &&(st==='all'||d.status===st)&&(rg==='all'||d.region===rg)
+  );
+}
+
+function render() {
+  const list=getFiltered();
+  document.getElementById('cTotal').textContent  = list.length;
+  document.getElementById('cActive').textContent = list.filter(d=>d.status==='Active').length;
+  const tot=list.reduce((s,d)=>s+Number(d.sales),0);
+  document.getElementById('cSales').textContent  = '₹'+tot.toLocaleString();
+  const top=list.length?list.reduce((m,d)=>Number(d.sales)>Number(m.sales)?d:m):null;
+  document.getElementById('cTop').textContent    = top?top.name:'-';
+
+  document.getElementById('tableBody').innerHTML = list.length ? list.map((d,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${d.name}</strong></td>
+      <td>${d.location}</td>
+      <td>${d.region||'-'}</td>
+      <td>${d.contact||'-'}</td>
+      <td>${d.email||'-'}</td>
+      <td>₹ ${Number(d.sales).toLocaleString()}</td>
+      <td>${d.commission||0}%</td>
+      <td><span class="status-text ${d.status==='Active'?'status-active':'status-inactive'}">${d.status}</span></td>
+      <td>
+        <button onclick="editRow(${d.id})" style="background:none;border:none;cursor:pointer;font-size:16px;color:#3b82f6;" title="Edit">✏️</button>
+        <button onclick="deleteRow(${d.id})" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ef4444;" title="Delete">🗑️</button>
+      </td>
+    </tr>`) .join('') : '<tr><td colspan="10" style="text-align:center;padding:24px;color:#94a3b8;">No distributors found.</td></tr>';
+}
+
+async function deleteRow(id) {
+  if(!confirm('Delete this distributor?')) return;
+  try { await fetch(API+'/'+id,{method:'DELETE'}); } catch(e){}
+  data=data.filter(d=>d.id!==id); render();
+}
+
+function editRow(id) {
+  const d=data.find(x=>x.id===id); if(!d) return;
+  document.getElementById('modalTitle').textContent='Edit Distributor';
+  document.getElementById('recId').value      = d.id;
+  document.getElementById('fName').value      = d.name;
+  document.getElementById('fLocation').value  = d.location;
+  document.getElementById('fRegion').value    = d.region||'North';
+  document.getElementById('fContact').value   = d.contact||'';
+  document.getElementById('fEmail').value     = d.email||'';
+  document.getElementById('fSales').value     = d.sales;
+  document.getElementById('fCommission').value= d.commission||5;
+  document.getElementById('fStatus').value    = d.status;
+  document.getElementById('modal').style.display='flex';
+}
+
+function closeModal() {
+  document.getElementById('modal').style.display='none';
+  document.getElementById('theForm').reset();
+  document.getElementById('recId').value='';
+}
+
+document.getElementById('theForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id=document.getElementById('recId').value;
+  const obj={
+    name:document.getElementById('fName').value.trim(),
+    location:document.getElementById('fLocation').value.trim(),
+    region:document.getElementById('fRegion').value,
+    contact:document.getElementById('fContact').value.trim(),
+    email:document.getElementById('fEmail').value.trim(),
+    sales:parseFloat(document.getElementById('fSales').value)||0,
+    commission:parseFloat(document.getElementById('fCommission').value)||5,
+    status:document.getElementById('fStatus').value
+  };
+  if(id) {
+    try{await fetch(API+'/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});}catch(e){}
+    const i=data.findIndex(d=>d.id===parseInt(id)); if(i!==-1) data[i]={...data[i],...obj};
+  } else {
+    try{const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});const nd=await r.json();data.push({...obj,id:nd.id});}
+    catch(e){data.push({...obj,id:Date.now()});}
+  }
+  closeModal(); render();
+});
+
+document.getElementById('searchInput').addEventListener('input',render);
+document.getElementById('statusFilter').addEventListener('change',render);
+document.getElementById('regionFilter').addEventListener('change',render);
+document.getElementById('addBtn').addEventListener('click',()=>{document.getElementById('modalTitle').textContent='Add Distributor';closeModal();document.getElementById('modal').style.display='flex';});
+document.getElementById('closeModal').addEventListener('click',closeModal);
+document.getElementById('cancelBtn').addEventListener('click',closeModal);
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  let csv='Name,Location,Region,Contact,Email,Sales,Commission,Status\n';
+  data.forEach(d=>{csv+=`"${d.name}","${d.location}","${d.region||''}","${d.contact||''}","${d.email||''}",${d.sales},${d.commission||0},"${d.status}"\n`;});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='distributors.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);
+});
+
+var role=localStorage.getItem('userRole');if(role)document.getElementById('profileLabel').textContent=role;
+load();
 </script>
 </body>
 </html>

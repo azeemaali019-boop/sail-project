@@ -6,19 +6,21 @@
   <title>SAIL Financial Ledger</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="auth.js"></script>
 </head>
-<body data-page="financial">
+<body>
 <div class="container">
   <div class="sidebar">
     <h2>SAIL</h2>
     <ul>
-      <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-      <li><a href="dealer.html" class="nav-link">Dealers</a></li>
-      <li><a href="distributors.html" class="nav-link">Distributors</a></li>
-      <li><a href="inventory.html" class="nav-link">Inventory</a></li>
-      <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
-      <li><a href="reports.html" class="nav-link">Reports</a></li>
-      <li><a href="form.html" class="nav-link">Logout</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="dealer.html">Dealers</a></li>
+      <li><a href="distributors.html">Distributors</a></li>
+      <li><a href="inventory.html">Inventory</a></li>
+      <li><a href="financial.html">Financial Ledger</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="ai.html">🤖 AI Assistant</a></li>
+      <li><a href="form.html">Logout</a></li>
     </ul>
   </div>
   <div class="main-content">
@@ -26,69 +28,201 @@
       <h1>Financial Ledger</h1>
       <div class="profile" id="profileLabel">Admin</div>
     </div>
-    <div class="table-section">
-      <div class="page-header">
-        <h2>Financial Overview</h2>
-        <div class="action-group">
-          <button id="exportBtn" class="btn-secondary">Export CSV</button>
-          <button class="btn-primary" onclick="location.href='dealer.html'">Add Transaction</button>
-        </div>
-      </div>
 
-      <div class="stats-container">
-        <div class="stat-card">
-          <div class="stat-icon">💰</div>
-          <div class="stat-info">
-            <h3>Balance</h3>
-            <p id="ledgerBalance">-</p>
+    <div class="stats-container">
+      <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-info"><h3>Total Income</h3><p id="statIncome">₹0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">📉</div><div class="stat-info"><h3>Total Expenses</h3><p id="statExpense">₹0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">💼</div><div class="stat-info"><h3>Net Balance</h3><p id="statNet">₹0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-info"><h3>Pending</h3><p id="statPending">₹0</p></div></div>
+    </div>
+
+    <div class="page-header">
+      <h2>Transaction Records</h2>
+      <div class="action-group">
+        <button id="addBtn" class="btn-primary">+ Add Transaction</button>
+        <button id="exportBtn" class="btn-secondary">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="search-filter-bar">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search by party or description...">
+      </div>
+      <div class="filter-group">
+        <select id="typeFilter"><option value="all">All Types</option><option value="Credit">Credit</option><option value="Debit">Debit</option></select>
+        <select id="statusFilter"><option value="all">All Status</option><option value="Paid">Paid</option><option value="Pending">Pending</option></select>
+      </div>
+    </div>
+
+    <div class="table-section" style="padding:0;overflow:hidden;">
+      <table class="innovative-table">
+        <thead>
+          <tr><th>#</th><th>Date</th><th>Type</th><th>Party</th><th>Description</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h2 id="modalTitle">Add Transaction</h2>
+          <span id="closeModal" style="font-size:26px;cursor:pointer;color:#94a3b8;">&times;</span>
+        </div>
+        <form id="txnForm">
+          <input type="hidden" id="txnId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="form-group"><label>Date</label><input type="date" id="txnDate" required></div>
+            <div class="form-group"><label>Type</label>
+              <select id="txnType"><option value="Credit">Credit (Income)</option><option value="Debit">Debit (Expense)</option></select>
+            </div>
+            <div class="form-group"><label>Party Name</label><input type="text" id="txnParty" required placeholder="Dealer / Supplier name"></div>
+            <div class="form-group"><label>Amount (₹)</label><input type="number" id="txnAmount" min="0" step="0.01" required placeholder="0.00"></div>
+            <div class="form-group" style="grid-column:1/-1;"><label>Description</label><input type="text" id="txnDesc" placeholder="Brief note about the transaction"></div>
+            <div class="form-group"><label>Status</label>
+              <select id="txnStatus"><option value="Paid">Paid</option><option value="Pending">Pending</option></select>
+            </div>
           </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">⬆️</div>
-          <div class="stat-info">
-            <h3>Total Credit</h3>
-            <p id="totalCredit">-</p>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+            <button type="button" id="cancelBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save Transaction</button>
           </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">⬇️</div>
-          <div class="stat-info">
-            <h3>Total Debit</h3>
-            <p id="totalDebit">-</p>
-          </div>
-        </div>
+        </form>
       </div>
-
-      <div class="search-filter-bar">
-        <div class="search-box"><i class="fa fa-search"></i><input id="searchInput" placeholder="Search description or type"></div>
-        <div class="filter-group">
-          <select id="typeFilter">
-            <option value="all">All Types</option>
-            <option value="credit">Credit</option>
-            <option value="debit">Debit</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="innovative-table">
-        <table>
-          <thead>
-            <tr><th>ID</th><th>Date</th><th>Description</th><th>Amount</th><th>Type</th></tr>
-          </thead>
-          <tbody id="financialTableBody">
-            <tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-
     </div>
   </div>
 </div>
-<script src="auth.js"></script>
-<script src="app_api.js"></script>
 <script>
-  var role = localStorage.getItem('userRole');
-  if (role) document.getElementById('profileLabel').textContent = role;
+const API = 'http://127.0.0.1:5000/api/transactions';
+let data = [];
+
+async function load() {
+  try { const r=await fetch(API); data=await r.json(); }
+  catch(e){
+    data=[
+      {id:1,date:'2026-01-10',type:'Credit',party:'Dealer A',   description:'Steel Rod sale',      amount:120000,status:'Paid'},
+      {id:2,date:'2026-01-15',type:'Credit',party:'Dealer B',   description:'Steel Pipe sale',      amount:85000, status:'Paid'},
+      {id:3,date:'2026-02-01',type:'Debit', party:'Supplier X', description:'Raw material purchase',amount:50000, status:'Paid'},
+      {id:4,date:'2026-02-10',type:'Credit',party:'Dist Alpha', description:'Bulk order',           amount:200000,status:'Paid'},
+      {id:5,date:'2026-03-05',type:'Debit', party:'Logistics',  description:'Transport charges',    amount:12000, status:'Paid'},
+      {id:6,date:'2026-03-20',type:'Credit',party:'Dealer C',   description:'Steel Sheet sale',     amount:60000, status:'Pending'},
+      {id:7,date:'2026-04-01',type:'Debit', party:'Maintenance',description:'Equipment service',    amount:8000,  status:'Paid'},
+      {id:8,date:'2026-04-15',type:'Credit',party:'Dist Beta',  description:'Monthly order',        amount:150000,status:'Paid'},
+      {id:9,date:'2026-05-10',type:'Credit',party:'Dealer D',   description:'TMT Bar sale',         amount:120000,status:'Pending'},
+      {id:10,date:'2026-05-25',type:'Debit',party:'Supplier Y', description:'Steel coil purchase',  amount:75000, status:'Paid'},
+    ];
+  }
+  render();
+}
+
+function filtered() {
+  const term   = document.getElementById('searchInput').value.toLowerCase();
+  const type   = document.getElementById('typeFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  return data.filter(d=>
+    (d.party.toLowerCase().includes(term)||(d.description||'').toLowerCase().includes(term))&&
+    (type==='all'||d.type===type)&&(status==='all'||d.status===status)
+  );
+}
+
+function render() {
+  const list = filtered();
+  const income  = list.filter(d=>d.type==='Credit').reduce((s,d)=>s+d.amount,0);
+  const expense = list.filter(d=>d.type==='Debit').reduce((s,d)=>s+d.amount,0);
+  const pending = list.filter(d=>d.status==='Pending').reduce((s,d)=>s+d.amount,0);
+  document.getElementById('statIncome').textContent  = '₹'+income.toLocaleString();
+  document.getElementById('statExpense').textContent = '₹'+expense.toLocaleString();
+  const net = income-expense;
+  const netEl = document.getElementById('statNet');
+  netEl.textContent = (net>=0?'₹':'−₹')+Math.abs(net).toLocaleString();
+  netEl.style.color = net>=0?'#10b981':'#ef4444';
+  document.getElementById('statPending').textContent = '₹'+pending.toLocaleString();
+
+  document.getElementById('tableBody').innerHTML = list.length ? list.map((d,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${d.date}</td>
+      <td><span class="type-badge ${d.type==='Credit'?'type-credit':'type-debit'}">${d.type==='Credit'?'▲ Credit':'▼ Debit'}</span></td>
+      <td><strong>${d.party}</strong></td>
+      <td>${d.description||'-'}</td>
+      <td class="${d.type==='Credit'?'amount-credit':'amount-debit'}"><strong>${d.type==='Credit'?'+':'-'} ₹${Number(d.amount).toLocaleString()}</strong></td>
+      <td><span class="status-text ${d.status==='Paid'?'status-active':'status-inactive'}">${d.status}</span></td>
+      <td class="action-buttons">
+        <button onclick="editRow(${d.id})" title="Edit">✏️</button>
+        <button onclick="deleteRow(${d.id})" title="Delete">🗑️</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;padding:30px;color:#94a3b8;">No transactions found.</td></tr>';
+}
+
+async function deleteRow(id) {
+  if(!confirm('Delete this transaction?')) return;
+  try { await fetch(API+'/'+id,{method:'DELETE'}); } catch(e){}
+  data=data.filter(d=>d.id!==id); render();
+}
+
+function editRow(id) {
+  const d=data.find(x=>x.id===id); if(!d) return;
+  document.getElementById('modalTitle').textContent = 'Edit Transaction';
+  document.getElementById('txnId').value     = d.id;
+  document.getElementById('txnDate').value   = d.date;
+  document.getElementById('txnType').value   = d.type;
+  document.getElementById('txnParty').value  = d.party;
+  document.getElementById('txnAmount').value = d.amount;
+  document.getElementById('txnDesc').value   = d.description||'';
+  document.getElementById('txnStatus').value = d.status;
+  openModal();
+}
+
+function openModal()  { document.getElementById('modal').style.display='flex'; }
+function closeModal() { document.getElementById('modal').style.display='none'; document.getElementById('txnForm').reset(); document.getElementById('txnId').value=''; }
+
+document.getElementById('txnForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id = document.getElementById('txnId').value;
+  const obj = {
+    date:        document.getElementById('txnDate').value,
+    type:        document.getElementById('txnType').value,
+    party:       document.getElementById('txnParty').value.trim(),
+    description: document.getElementById('txnDesc').value.trim(),
+    amount:      parseFloat(document.getElementById('txnAmount').value)||0,
+    status:      document.getElementById('txnStatus').value
+  };
+  if(id) {
+    try { await fetch(API+'/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)}); } catch(e){}
+    const idx=data.findIndex(d=>d.id===parseInt(id)); if(idx!==-1) data[idx]={...data[idx],...obj};
+  } else {
+    try { const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)}); const nd=await r.json(); data.push({...obj,id:nd.id}); }
+    catch(e){ data.push({...obj,id:Date.now()}); }
+  }
+  closeModal(); render();
+});
+
+// Set today's date as default
+document.getElementById('txnDate').valueAsDate = new Date();
+document.getElementById('searchInput').addEventListener('input',render);
+document.getElementById('typeFilter').addEventListener('change',render);
+document.getElementById('statusFilter').addEventListener('change',render);
+document.getElementById('addBtn').addEventListener('click',()=>{ document.getElementById('modalTitle').textContent='Add Transaction'; closeModal(); openModal(); });
+document.getElementById('closeModal').addEventListener('click',closeModal);
+document.getElementById('cancelBtn').addEventListener('click',closeModal);
+document.getElementById('modal').addEventListener('click',e=>{ if(e.target===document.getElementById('modal')) closeModal(); });
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  let csv='Date,Type,Party,Description,Amount,Status\n';
+  data.forEach(d=>{ csv+=`"${d.date}","${d.type}","${d.party}","${d.description||''}",${d.amount},"${d.status}"\n`; });
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='ledger.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+});
+
+var role=localStorage.getItem('userRole'); if(role) document.getElementById('profileLabel').textContent=role;
+load();
 </script>
+<style>
+.type-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.type-credit{background:#d1fae5;color:#065f46;}
+.type-debit{background:#fee2e2;color:#991b1b;}
+.amount-credit{color:#10b981;}
+.amount-debit{color:#ef4444;}
+</style>
 </body>
 </html>

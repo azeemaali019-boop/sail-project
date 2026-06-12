@@ -6,77 +6,239 @@
   <title>SAIL Reports</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script src="auth.js"></script>
+  <script src="ai.js"></script>
 </head>
-<body data-page="reports">
+<body>
 <div class="container">
   <div class="sidebar">
     <h2>SAIL</h2>
     <ul>
-      <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-      <li><a href="dealer.html" class="nav-link">Dealers</a></li>
-      <li><a href="distributors.html" class="nav-link">Distributors</a></li>
-      <li><a href="inventory.html" class="nav-link">Inventory</a></li>
-      <li><a href="financial.html" class="nav-link">Financial Ledger</a></li>
-      <li><a href="reports.html" class="nav-link">Reports</a></li>
-      <li><a href="form.html" class="nav-link">Logout</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="dealer.html">Dealers</a></li>
+      <li><a href="distributors.html">Distributors</a></li>
+      <li><a href="inventory.html">Inventory</a></li>
+      <li><a href="financial.html">Financial Ledger</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="ai.html">🤖 AI Assistant</a></li>
+      <li><a href="form.html">Logout</a></li>
     </ul>
   </div>
   <div class="main-content">
     <div class="topbar">
-      <h1>Reports</h1>
+      <h1>Reports &amp; Analytics</h1>
       <div class="profile" id="profileLabel">Admin</div>
     </div>
+
+    <!-- KPI Cards -->
+    <div class="stats-container">
+      <div class="stat-card"><div class="stat-icon">🏪</div><div class="stat-info"><h3>Dealer Sales</h3><p id="kpiDealer">₹0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">🏢</div><div class="stat-info"><h3>Distributor Sales</h3><p id="kpiDist">₹0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-info"><h3>Total Stock Units</h3><p id="kpiStock">0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-info"><h3>Pending Payments</h3><p id="kpiPending">₹0</p></div></div>
+    </div>
+
+    <!-- Top Performers -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+      <div class="table-section">
+        <h2 style="margin-bottom:16px;">🏆 Top Dealer</h2>
+        <div id="topDealerCard" class="performer-card"></div>
+      </div>
+      <div class="table-section">
+        <h2 style="margin-bottom:16px;">🏆 Top Distributor</h2>
+        <div id="topDistCard" class="performer-card"></div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;">
+      <div class="table-section">
+        <h2 style="margin-bottom:16px;">📊 Monthly Income vs Expense</h2>
+        <canvas id="monthlyChart" height="120"></canvas>
+      </div>
+      <div class="table-section">
+        <h2 style="margin-bottom:16px;">🥧 Sales Distribution</h2>
+        <canvas id="pieChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Dealer Sales Table -->
+    <div class="table-section" style="margin-bottom:24px;">
+      <h2 style="margin-bottom:16px;">📋 Dealer Performance</h2>
+      <table class="innovative-table">
+        <thead><tr><th>#</th><th>Dealer</th><th>Location</th><th>Sales</th><th>Status</th><th>Share %</th></tr></thead>
+        <tbody id="dealerTable"></tbody>
+      </table>
+    </div>
+
+    <!-- Distributor Sales Table -->
     <div class="table-section">
-      <div class="page-header">
-        <h2>Reports Overview</h2>
-        <div class="action-group">
-          <button id="exportBtn" class="btn-secondary">Export CSV</button>
-        </div>
-      </div>
-
-      <div class="stats-container">
-        <div class="stat-card">
-          <div class="stat-icon">📊</div>
-          <div class="stat-info">
-            <h3>Total Sales</h3>
-            <p id="reportTotalSales">-</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">🧾</div>
-          <div class="stat-info">
-            <h3>Transactions</h3>
-            <p id="reportTotalTransactions">-</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">🔎</div>
-          <div class="stat-info">
-            <h3>Insights</h3>
-            <p id="reportInsights">-</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="innovative-table">
-        <table>
-          <thead>
-            <tr><th>ID</th><th>Title</th><th>Value</th></tr>
-          </thead>
-          <tbody id="reportsTableBody">
-            <tr><td colspan="3" style="text-align:center;padding:30px;color:#94a3b8;">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-
+      <h2 style="margin-bottom:16px;">📋 Distributor Performance</h2>
+      <table class="innovative-table">
+        <thead><tr><th>#</th><th>Distributor</th><th>Region</th><th>Sales</th><th>Commission</th><th>Status</th></tr></thead>
+        <tbody id="distTable"></tbody>
+      </table>
     </div>
   </div>
 </div>
-<script src="auth.js"></script>
-<script src="app_api.js"></script>
 <script>
-  var role = localStorage.getItem('userRole');
-  if (role) document.getElementById('profileLabel').textContent = role;
+var monthlyChart, pieChart;
+
+async function load() {
+  let summary={}, dealers=[], dists=[];
+  try {
+    const [sr, dr, distr] = await Promise.all([
+      fetch('http://127.0.0.1:5000/api/reports/summary'),
+      fetch('http://127.0.0.1:5000/api/dealers'),
+      fetch('http://127.0.0.1:5000/api/distributors')
+    ]);
+    summary = await sr.json();
+    dealers = await dr.json();
+    dists   = await distr.json();
+  } catch(e) {
+    summary = {
+      dealer_sales:385000, dist_sales:615000, total_stock:12350, pending_payments:180000,
+      top_dealer:{name:'Dealer A',sales:120000}, top_distributor:{name:'Dist Alpha',sales:200000},
+      monthly_chart:[
+        {month:'2026-01',income:205000,expense:0},
+        {month:'2026-02',income:200000,expense:50000},
+        {month:'2026-03',income:60000, expense:12000},
+        {month:'2026-04',income:150000,expense:8000},
+        {month:'2026-05',income:120000,expense:75000},
+      ]
+    };
+    dealers = [{id:1,name:'Dealer A',location:'Mumbai',sales:120000,status:'Active'},{id:2,name:'Dealer B',location:'Delhi',sales:85000,status:'Active'},{id:3,name:'Dealer C',location:'Bangalore',sales:60000,status:'Inactive'},{id:4,name:'Dealer D',location:'Jharkhand',sales:120000,status:'Active'}];
+    dists   = [{id:1,name:'Dist Alpha',location:'Chennai',region:'South',sales:200000,commission:6,status:'Active'},{id:2,name:'Dist Beta',location:'Kolkata',region:'East',sales:150000,commission:5.5,status:'Active'},{id:3,name:'Dist Gamma',location:'Pune',region:'West',sales:90000,commission:4,status:'Inactive'},{id:4,name:'Dist Delta',location:'Hyderabad',region:'South',sales:175000,commission:5,status:'Active'}];
+  }
+  renderKPIs(summary);
+  renderPerformers(summary);
+  renderCharts(summary, dealers, dists);
+  renderTables(dealers, dists);
+}
+
+function renderKPIs(s) {
+  document.getElementById('kpiDealer').textContent  = '₹'+Number(s.dealer_sales||0).toLocaleString();
+  document.getElementById('kpiDist').textContent    = '₹'+Number(s.dist_sales||0).toLocaleString();
+  document.getElementById('kpiStock').textContent   = Number(s.total_stock||0).toLocaleString();
+  document.getElementById('kpiPending').textContent = '₹'+Number(s.pending_payments||0).toLocaleString();
+}
+
+function renderPerformers(s) {
+  const td = s.top_dealer||{};
+  const ti = s.top_distributor||{};
+  document.getElementById('topDealerCard').innerHTML = td.name
+    ? `<div style="text-align:center;padding:16px;"><div style="font-size:48px;margin-bottom:8px;">🥇</div><h3 style="font-size:20px;color:#1e293b;">${td.name}</h3><p style="color:#667eea;font-size:22px;font-weight:bold;margin-top:6px;">₹${Number(td.sales).toLocaleString()}</p></div>`
+    : '<p style="color:#94a3b8;padding:16px;">No data</p>';
+  document.getElementById('topDistCard').innerHTML = ti.name
+    ? `<div style="text-align:center;padding:16px;"><div style="font-size:48px;margin-bottom:8px;">🥇</div><h3 style="font-size:20px;color:#1e293b;">${ti.name}</h3><p style="color:#667eea;font-size:22px;font-weight:bold;margin-top:6px;">₹${Number(ti.sales).toLocaleString()}</p></div>`
+    : '<p style="color:#94a3b8;padding:16px;">No data</p>';
+}
+
+function renderCharts(summary, dealers, dists) {
+  const mc = summary.monthly_chart||[];
+  if(monthlyChart) monthlyChart.destroy();
+  monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+    type:'bar',
+    data:{
+      labels: mc.map(r=>r.month),
+      datasets:[
+        {label:'Income',  data:mc.map(r=>r.income||0),  backgroundColor:'rgba(16,185,129,0.7)', borderRadius:6},
+        {label:'Expense', data:mc.map(r=>r.expense||0), backgroundColor:'rgba(239,68,68,0.7)',  borderRadius:6}
+      ]
+    },
+    options:{responsive:true,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'₹'+v.toLocaleString()}}}}
+  });
+
+  const totalD = dealers.reduce((s,d)=>s+d.sales,0);
+  const totalDi= dists.reduce((s,d)=>s+d.sales,0);
+  if(pieChart) pieChart.destroy();
+  pieChart = new Chart(document.getElementById('pieChart'), {
+    type:'doughnut',
+    data:{
+      labels:['Dealer Sales','Distributor Sales'],
+      datasets:[{data:[totalD,totalDi],backgroundColor:['#667eea','#f59e0b'],borderWidth:0}]
+    },
+    options:{responsive:true,plugins:{legend:{position:'bottom'}}}
+  });
+}
+
+function renderTables(dealers, dists) {
+  const totalD = dealers.reduce((s,d)=>s+d.sales,0)||1;
+  document.getElementById('dealerTable').innerHTML = dealers.map((d,i)=>`
+    <tr>
+      <td>${i+1}</td><td><strong>${d.name}</strong></td><td>${d.location}</td>
+      <td><strong>₹${Number(d.sales).toLocaleString()}</strong></td>
+      <td><span class="status-text ${d.status==='Active'?'status-active':'status-inactive'}">${d.status}</span></td>
+      <td><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(d.sales/totalD*100)}%"></div></div> ${Math.round(d.sales/totalD*100)}%</td>
+    </tr>`).join('');
+  document.getElementById('distTable').innerHTML = dists.map((d,i)=>`
+    <tr>
+      <td>${i+1}</td><td><strong>${d.name}</strong></td><td>${d.region||'-'}</td>
+      <td><strong>₹${Number(d.sales).toLocaleString()}</strong></td>
+      <td>${d.commission||0}%</td>
+      <td><span class="status-text ${d.status==='Active'?'status-active':'status-inactive'}">${d.status}</span></td>
+    </tr>`).join('');
+}
+
+var role=localStorage.getItem('userRole'); if(role) document.getElementById('profileLabel').textContent=role;
+load();
+</script>
+<style>
+.performer-card{border-radius:12px;background:linear-gradient(135deg,#f8faff,#eef2ff);}
+.progress-bar{display:inline-block;width:80px;height:8px;background:#e2e8f0;border-radius:4px;vertical-align:middle;margin-right:6px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:4px;}
+</style>
+
+<script>
+// AI Report Summary box — injected after KPI cards load
+document.addEventListener('DOMContentLoaded', function() {
+  // Insert AI summary section after the KPI cards
+  var topbar = document.querySelector('.topbar');
+  if (!topbar) return;
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:white;border-radius:15px;padding:20px 24px;margin-bottom:24px;box-shadow:0 2px 10px rgba(0,0,0,0.08);border-left:4px solid #10b981;';
+  box.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;">'
+    + '<h3 style="color:#1e293b;font-size:15px;">🤖 AI Executive Summary</h3>'
+    + '<button id="reportAIBtn" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">📋 Generate AI Summary</button>'
+    + '</div>'
+    + '<div id="reportAIResult" style="margin-top:12px;color:#475569;font-size:14px;line-height:1.7;display:none;"></div>';
+
+  // Insert after topbar
+  topbar.parentNode.insertBefore(box, topbar.nextSibling);
+
+  document.getElementById('reportAIBtn').addEventListener('click', async function() {
+    var btn=this, result=document.getElementById('reportAIResult');
+    btn.textContent='⏳ Generating...'; btn.disabled=true; result.style.display='block';
+    result.innerHTML='<span style="color:#10b981;">AI is generating your executive summary...</span>';
+    try {
+      var dealers = [], dists = [], txns = [], inv = [];
+      try {
+        var r1=await fetch('http://127.0.0.1:5000/api/dealers'); dealers=await r1.json();
+        var r2=await fetch('http://127.0.0.1:5000/api/distributors'); dists=await r2.json();
+        var r3=await fetch('http://127.0.0.1:5000/api/transactions'); txns=await r3.json();
+        var r4=await fetch('http://127.0.0.1:5000/api/inventory'); inv=await r4.json();
+      } catch(e) {
+        dealers=[{name:'Dealer A',sales:120000,status:'Active'},{name:'Dealer B',sales:85000,status:'Active'},{name:'Dealer C',sales:60000,status:'Inactive'},{name:'Dealer D',sales:120000,status:'Active'}];
+        dists=[{name:'Dist Alpha',sales:200000,status:'Active'},{name:'Dist Beta',sales:150000,status:'Active'}];
+        txns=[{type:'Credit',amount:120000,status:'Paid'},{type:'Debit',amount:50000,status:'Paid'},{type:'Credit',amount:60000,status:'Pending'}];
+        inv=[{product_name:'Steel Rod',quantity:5000,status:'In Stock'},{product_name:'Steel Sheet',quantity:800,status:'Low Stock'}];
+      }
+      var text = await getReportSummary(dealers, dists, txns, inv);
+      result.innerHTML = text.split('\n').filter(function(l){return l.trim();}).map(function(l){
+        return (l.startsWith('-')||l.startsWith('•')||l.startsWith('*'))
+          ? '<div style="padding:4px 0 4px 14px;border-left:3px solid #10b981;margin:6px 0;">'+l.replace(/^[-•*]\s*/,'')+'</div>'
+          : '<p style="margin:6px 0;">'+l+'</p>';
+      }).join('');
+      btn.textContent='📋 Regenerate';
+    } catch(e) {
+      result.innerHTML='<span style="color:#ef4444;">⚠️ AI unavailable.</span>';
+      btn.textContent='📋 Retry';
+    }
+    btn.disabled=false;
+  });
+});
 </script>
 </body>
 </html>

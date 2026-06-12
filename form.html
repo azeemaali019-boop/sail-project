@@ -3,189 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAIL Login Page</title>
+  <title>SAIL Login</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
-
-    body {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(to right, #003366, #0059b3);
-    }
-
-    .container {
-      width: 900px;
-      height: 550px;
-      background: white;
-      border-radius: 20px;
-      overflow: hidden;
-      display: flex;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    /* Left panel */
-    .left-panel {
-      width: 50%;
-      background: #003366;
-      color: white;
-      padding: 50px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-    .left-panel h1 { font-size:48px; margin-bottom:20px; }
-    .left-panel h2 { font-size:24px; margin-bottom:20px; }
-    .left-panel p  { font-size:15px; line-height:1.6; color:#d9e6f2; }
-
-    .logo-circle {
-      width: 130px; height: 130px;
-      background: #0059b3;
-      border-radius: 50%;
-      margin-top: 30px;
-      display: flex; justify-content: center; align-items: center;
-      font-size: 42px; font-weight: bold;
-      overflow: hidden;
-    }
-    .logo-circle img { width:100%; height:100%; object-fit:cover; }
-
-    /* Right panel */
-    .right-panel {
-      width: 50%;
-      padding: 50px 45px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .right-panel h2 { font-size:28px; color:#333; margin-bottom:6px; }
-    .right-panel > p { color:gray; margin-bottom:24px; font-size:14px; }
-
-    .form-group { margin-bottom:16px; }
-    .form-group label { display:block; margin-bottom:6px; color:#444; font-weight:bold; font-size:14px; }
-    .form-group input,
-    .form-group select {
-      width: 100%; padding: 12px 14px;
-      border: 1px solid #ccc; border-radius: 10px; font-size: 14px;
-    }
-    .form-group input:focus,
-    .form-group select:focus { outline:none; border-color:#0059b3; box-shadow:0 0 0 3px rgba(0,89,179,0.12); }
-
-    .options {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 16px; font-size: 13px;
-    }
-    .options a { text-decoration:none; color:#0059b3; }
-
-    .error-msg {
-      color: #dc2626; font-size:13px;
-      margin-bottom: 10px; display: none;
-      background:#fee2e2; padding:8px 12px; border-radius:6px;
-    }
-
-    .login-btn {
-      width:100%; padding:13px;
-      background:#0059b3; color:white;
-      border:none; border-radius:10px;
-      font-size:15px; font-weight:bold;
-      cursor:pointer; transition:0.3s;
-    }
-    .login-btn:hover { background:#004080; }
-
-    .footer { margin-top:20px; text-align:center; color:gray; font-size:12px; }
-
-    @media (max-width:768px) {
-      .container { flex-direction:column; width:95%; height:auto; }
-      .left-panel, .right-panel { width:100%; }
-      .left-panel { padding:30px; }
-      .right-panel { padding:35px 25px; }
-    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;font-family:Arial,sans-serif;}
+    body{min-height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#003366 0%,#0059b3 100%);padding:20px;}
+    .login-wrapper{width:100%;max-width:880px;min-height:520px;background:white;border-radius:20px;overflow:hidden;display:flex;box-shadow:0 15px 40px rgba(0,0,0,.25);}
+    .login-left{width:45%;background:#003366;color:white;padding:50px 40px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;}
+    .login-left h1{font-size:52px;font-weight:900;letter-spacing:3px;margin-bottom:14px;}
+    .login-left h2{font-size:18px;font-weight:600;margin-bottom:16px;line-height:1.4;}
+    .login-left p{font-size:14px;line-height:1.7;color:#c8ddf0;}
+    .login-logo{width:120px;height:120px;background:#0059b3;border-radius:50%;margin-top:28px;display:flex;justify-content:center;align-items:center;font-size:38px;font-weight:900;color:white;overflow:hidden;}
+    .login-logo img{width:100%;height:100%;object-fit:cover;}
+    .login-right{width:55%;padding:50px 48px;display:flex;flex-direction:column;justify-content:center;}
+    .login-right h2{font-size:28px;color:#1e293b;margin-bottom:6px;}
+    .subtitle{color:#64748b;font-size:14px;margin-bottom:20px;}
+    .hint{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 14px;font-size:12px;color:#0369a1;margin-bottom:16px;}
+    .field{margin-bottom:16px;}
+    .field label{display:block;font-size:13px;font-weight:700;color:#374151;margin-bottom:6px;}
+    .field input,.field select{width:100%;padding:12px 14px;border:1.5px solid #d1d5db;border-radius:10px;font-size:14px;color:#1e293b;transition:border-color .2s;background:white;}
+    .field input:focus,.field select:focus{outline:none;border-color:#0059b3;box-shadow:0 0 0 3px rgba(0,89,179,.12);}
+    .login-options{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:16px;color:#374151;}
+    .login-options a{color:#0059b3;text-decoration:none;}
+    .login-options label{display:flex;align-items:center;gap:6px;cursor:pointer;}
+    .login-error{display:none;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;}
+    .login-btn{width:100%;padding:14px;background:#0059b3;color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:background .25s;}
+    .login-btn:hover{background:#004494;}
+    .login-btn:disabled{background:#94a3b8;cursor:not-allowed;}
+    .login-footer{margin-top:20px;text-align:center;color:#9ca3af;font-size:12px;}
+    @media(max-width:680px){.login-wrapper{flex-direction:column;max-width:420px;}.login-left,.login-right{width:100%;}.login-left{padding:30px;}.login-right{padding:30px;}}
   </style>
 </head>
 <body>
-
-<div class="container">
-
-  <!-- Left -->
-  <div class="left-panel">
+<div class="login-wrapper">
+  <div class="login-left">
     <h1>SAIL</h1>
     <h2>Sales Flow &amp; Financial Tracking System</h2>
     <p>Monitor dealer purchases, distributor sales, inventory flow, and financial transactions across the SAIL distribution network.</p>
-    <div class="logo-circle">
-      <img src="SAIL_Logo.png" alt="SAIL"
-           onerror="this.style.display='none'; this.parentElement.textContent='SAIL'">
+    <div class="login-logo">
+      <img src="SAIL_Logo.png" alt="SAIL" onerror="this.style.display='none';this.parentElement.textContent='SAIL'">
     </div>
   </div>
-
-  <!-- Right -->
-  <div class="right-panel">
-    <h2>Welcome to SAIL</h2>
-    <p>Login to continue to your dashboard</p>
-
-    <form id="loginForm">
-      <div class="form-group">
+  <div class="login-right">
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Login to continue to your dashboard</p>
+    <div class="hint">Default login &mdash; Email: <strong>admin@sail.com</strong> &nbsp;|&nbsp; Password: <strong>admin123</strong></div>
+    <form id="loginForm" novalidate>
+      <div class="field">
         <label>Email Address</label>
-        <input type="email" id="emailInput" placeholder="Enter your email" required>
+        <input type="email" id="emailInput" placeholder="admin@sail.com" value="admin@sail.com" required>
       </div>
-
-      <div class="form-group">
+      <div class="field">
         <label>Password</label>
-        <input type="password" id="passwordInput" placeholder="Enter your password" required>
+        <input type="password" id="passwordInput" placeholder="Enter your password" value="admin123" required>
       </div>
-
-      <div class="form-group">
+      <div class="field">
         <label>Login Role</label>
         <select id="roleSelect">
-          <option>SAIL Admin</option>
-          <option>Dealer</option>
-          <option>Distributor</option>
+          <option value="SAIL Admin">SAIL Admin</option>
+          <option value="Dealer">Dealer</option>
+          <option value="Distributor">Distributor</option>
         </select>
       </div>
-
-      <div class="options">
+      <div class="login-options">
         <label><input type="checkbox"> Remember Me</label>
         <a href="#">Forgot Password?</a>
       </div>
-
-      <p class="error-msg" id="errorMsg">Please enter your email and password.</p>
-
-      <button type="submit" class="login-btn">Login</button>
+      <div class="login-error" id="errorMsg">Invalid email or password.</div>
+      <button type="submit" class="login-btn" id="loginBtn">Login</button>
     </form>
-
-    <div class="footer">© 2026 SAIL Financial Tracking System</div>
+    <p class="login-footer">&copy; 2026 SAIL Financial Tracking System</p>
   </div>
-
 </div>
-
 <script>
-  // Clear any stale session when landing on login page
   localStorage.removeItem('loggedIn');
   localStorage.removeItem('userRole');
 
-  document.getElementById('loginForm').addEventListener('submit', function (e) {
-    e.preventDefault(); // CRITICAL: stop browser navigation
-
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
     var email    = document.getElementById('emailInput').value.trim();
-    var password = document.getElementById('passwordInput').value;
-    var errorMsg = document.getElementById('errorMsg');
-
-    if (!email || !password) {
-      errorMsg.style.display = 'block';
-      return;
+    var password = document.getElementById('passwordInput').value.trim();
+    var errBox   = document.getElementById('errorMsg');
+    var btn      = document.getElementById('loginBtn');
+    if (!email || !password) { errBox.style.display='block'; return; }
+    btn.disabled = true; btn.textContent = 'Logging in...';
+    errBox.style.display = 'none';
+    try {
+      var res  = await fetch('http://127.0.0.1:5000/api/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: email, password: password })
+      });
+      var data = await res.json();
+      if (data.success) {
+        localStorage.setItem('loggedIn','true');
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('userEmail', data.email);
+        window.location.href = 'dashboard.html';
+      } else {
+        errBox.textContent = data.message || 'Invalid credentials.';
+        errBox.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Login';
+      }
+    } catch(err) {
+      // Fallback: allow login if backend is offline (dev mode)
+      localStorage.setItem('loggedIn','true');
+      localStorage.setItem('userRole', document.getElementById('roleSelect').value);
+      window.location.href = 'dashboard.html';
     }
-
-    errorMsg.style.display = 'none';
-
-    // Set login state BEFORE navigating
-    localStorage.setItem('loggedIn', 'true');
-    localStorage.setItem('userRole', document.getElementById('roleSelect').value);
-
-    // Navigate to dashboard
-    window.location.href = 'dashboard.html';
   });
 </script>
-
 </body>
 </html>
