@@ -206,18 +206,16 @@ async function sendMessage() {
   document.getElementById('sendBtn').disabled = true;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('http://127.0.0.1:5000/api/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
         system: buildSystemPrompt(),
-        messages: chatHistory
+        message: text
       })
     });
     const data = await res.json();
-    const reply = data.content[0].text;
+    const reply = data.reply;
     chatHistory.push({ role:'assistant', content: reply });
     loadingBubble.className = 'msg-bubble msg-bubble-bot';
     loadingBubble.innerHTML = reply.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');

@@ -74,10 +74,10 @@ function fetchAndRender() {
         fetch(API_BASE_URL + '/api/inventory').then(r=>r.json()).then(function (data) {
             var cols = [
                 { key: 'id', label: 'SKU' },
-                { key: 'product', label: 'Product' },
+                { key: 'product_name', label: 'Product' },
                 { key: 'warehouse', label: 'Warehouse' },
-                { key: 'stock', label: 'Stock' },
-                { key: 'reorder_level', label: 'Reorder Level' }
+                { key: 'quantity', label: 'Stock' },
+                { key: 'status', label: 'Status' }
             ];
             renderTable(cols, data, 'inventoryTableBody');
             document.getElementById('exportBtn')?.addEventListener('click', function () { exportCSV(data, cols, 'inventory.csv'); });
@@ -85,7 +85,7 @@ function fetchAndRender() {
             // stats
             try {
                 document.getElementById('totalSKUs').textContent = data.length;
-                var low = data.filter(item => (item.stock || 0) <= (item.reorder_level || 0)).length;
+                var low = data.filter(item => item.status === 'Low Stock').length;
                 document.getElementById('lowStockCount').textContent = low;
                 var warehouses = Array.from(new Set(data.map(it=>it.warehouse))).filter(Boolean).length;
                 document.getElementById('warehouseCount').textContent = warehouses;

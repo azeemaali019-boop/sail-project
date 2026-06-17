@@ -1,6 +1,11 @@
 from flask import Flask, jsonify, request
+import os
+import google.generativeai as genai
 from flask_cors import CORS
 import sqlite3, hashlib
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -23,15 +28,7 @@ def init_db():
         );
         CREATE TABLE IF NOT EXISTS dealers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            code TEXT,
             name TEXT NOT NULL,
-            contact TEXT,
-            phone TEXT,
-            email TEXT,
-            address TEXT,
-            pin TEXT,
-            gstin TEXT,
-            established TEXT,
             location TEXT NOT NULL,
             sales REAL DEFAULT 0,
             status TEXT DEFAULT 'Active'
@@ -72,35 +69,18 @@ def init_db():
     c.execute("INSERT OR IGNORE INTO users (email,password,role) VALUES (?,?,?)",
               ('admin@sail.com', pw, 'SAIL Admin'))
 
-    # ensure any missing columns are added when upgrading existing DB
-    try:
-        cols = [r['name'] for r in conn.execute("PRAGMA table_info(dealers)").fetchall()]
-    except Exception:
-        cols = []
-    for col in ('code','contact','phone','email','address','pin','gstin','established'):
-        if col not in cols:
-            try:
-                conn.execute(f"ALTER TABLE dealers ADD COLUMN {col} TEXT")
-            except Exception:
-                pass
-
-    existing_codes = set(r['code'] for r in conn.execute("SELECT code FROM dealers").fetchall() if r['code'])
-    sample_dealers = [
-        ('D001','Dealer A','Ravi Kumar','9876543210','ravi@example.com','Andheri West','400053','27AAAAA0000A1Z5','2015-06-12','Mumbai',120000,'Active'),
-        ('D002','Dealer B','Anita Sharma','9123456780','anita@example.com','Civil Lines','110054','07BBBBB1111B2Z6','2018-03-20','Delhi',85000,'Active'),
-        ('D003','Dealer C','Mohit Singh','9988776655','mohit@example.com','Indiranagar','560038','29CCCCC2222C3Z7','2012-11-01','Bangalore',60000,'Inactive'),
-        ('D004','Dealer D','Sonia Rao','9001122334','sonia@example.com','Ranchi Center','834001','20DDDDD3333D4Z8','2019-07-15','Jharkhand',120000,'Active'),
-        ('D005','Dealer E','Vikram Patel','9811223344','vikram@example.com','MG Road','400007','29EEEEE4444E5Z9','2020-09-25','Pune',95000,'Active'),
-        ('D006','Dealer F','Neha Joshi','9877712345','neha@example.com','Bandra','400050','27FFFFF5555F6Z0','2021-02-18','Mumbai',76000,'Active'),
-        ('D007','Dealer G','Arjun Mehta','9900445566','arjun@example.com','Salt Lake','700091','19GGGGG6666G7Z1','2022-05-30','Kolkata',68000,'Active'),
-        ('D008','Dealer H','Priya Nair','9966554433','priya@example.com','Banjara Hills','500034','36HHHHH7777H8Z2','2023-08-12','Hyderabad',83000,'Active'),
-    ]
-    for dealer in sample_dealers:
-        if dealer[0] not in existing_codes:
-            c.execute(
-                "INSERT INTO dealers (code,name,contact,phone,email,address,pin,gstin,established,location,sales,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                dealer
-            )
+    c.executemany("INSERT OR IGNORE INTO dealers (name,location,sales,status) VALUES (?,?,?,?)", [
+        ('Rajesh Steel Works',  'Mumbai',    180000, 'Active'),
+        ('Sharma Traders',      'Delhi',     145000, 'Active'),
+        ('Karnataka Steel Co',  'Bangalore',  92000, 'Active'),
+        ('Jharkhand Metals',    'Jharkhand', 120000, 'Active'),
+        ('Kolkata Steel Hub',   'Kolkata',    75000, 'Inactive'),
+        ('Chennai Iron & Steel','Chennai',   160000, 'Active'),
+        ('Pune Metal Works',    'Pune',       88000, 'Active'),
+        ('Hyderabad Steel Mart','Hyderabad', 110000, 'Active'),
+        ('Ahmedabad Steels',    'Ahmedabad',  95000, 'Inactive'),
+        ('Lucknow Metals',      'Lucknow',    67000, 'Active'),
+    ])
 
     c.executemany("INSERT OR IGNORE INTO distributors (name,location,region,contact,email,sales,commission,status) VALUES (?,?,?,?,?,?,?,?)", [
         ('Dist Alpha','Chennai','South','9876543210','alpha@dist.com',200000,6.0,'Active'),
@@ -158,10 +138,8 @@ def get_dealers():
 def add_dealer():
     d = request.json
     conn = get_db()
-    cur = conn.execute(
-        "INSERT INTO dealers (code,name,contact,phone,email,address,pin,gstin,established,location,sales,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-        (d.get('code'), d.get('name'), d.get('contact'), d.get('phone'), d.get('email'), d.get('address'), d.get('pin'), d.get('gstin'), d.get('established'), d.get('location'), d.get('sales',0), d.get('status','Active'))
-    )
+    cur = conn.execute("INSERT INTO dealers (name,location,sales,status) VALUES (?,?,?,?)",
+                       (d['name'],d['location'],d.get('sales',0),d.get('status','Active')))
     conn.commit(); nid = cur.lastrowid; conn.close()
     return jsonify({'id':nid,**d}), 201
 
@@ -169,10 +147,8 @@ def add_dealer():
 def update_dealer(did):
     d = request.json
     conn = get_db()
-    conn.execute(
-        "UPDATE dealers SET code=?,name=?,contact=?,phone=?,email=?,address=?,pin=?,gstin=?,established=?,location=?,sales=?,status=? WHERE id=?",
-        (d.get('code'), d.get('name'), d.get('contact'), d.get('phone'), d.get('email'), d.get('address'), d.get('pin'), d.get('gstin'), d.get('established'), d.get('location'), d.get('sales',0), d.get('status','Active'), did)
-    )
+    conn.execute("UPDATE dealers SET name=?,location=?,sales=?,status=? WHERE id=?",
+                 (d['name'],d['location'],d['sales'],d['status'],did))
     conn.commit(); conn.close()
     return jsonify({'success':True})
 
@@ -306,6 +282,47 @@ def reports_summary():
         'top_distributor':dict(top_dist) if top_dist else {},
         'monthly_chart':[dict(r) for r in monthly],
     })
+
+@app.route('/api/reports', methods=['GET'])
+def get_reports_full():
+    conn = get_db()
+    summary = conn.execute("""
+        SELECT 
+            COUNT(*) as total_transactions, 
+            SUM(CASE WHEN type='Credit' THEN amount ELSE 0 END) as total_sales 
+        FROM transactions
+    """).fetchone()
+    items = [
+        {'id': 1, 'title': 'Active Dealers', 'value': conn.execute("SELECT COUNT(*) FROM dealers WHERE status='Active'").fetchone()[0]},
+        {'id': 2, 'title': 'Active Distributors', 'value': conn.execute("SELECT COUNT(*) FROM distributors WHERE status='Active'").fetchone()[0]},
+        {'id': 3, 'title': 'Low Stock Products', 'value': conn.execute("SELECT COUNT(*) FROM inventory WHERE status='Low Stock'").fetchone()[0]}
+    ]
+    conn.close()
+    return jsonify({'summary': dict(summary), 'items': items})
+
+# ── AI PROXY (avoids browser CORS on direct Anthropic calls) ─────────────────
+@app.route('/api/ai', methods=['POST'])
+def ai_proxy():
+    try:
+        data = request.json or {}
+        key = os.environ.get('GEMINI_API_KEY', '').strip()
+        if not key:
+            return jsonify({'error': 'GEMINI_API_KEY not set', 'reply': '⚠️ AI error: missing API key'}), 500
+
+        genai.configure(api_key=key)
+        
+        # Use gemini-1.5-flash (stable and fast)
+        model = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            system_instruction=data.get('system', 'You are a helpful business assistant.')
+        )
+
+        response = model.generate_content(data.get('message', ''))
+        reply = response.text if response.text else "No response generated."
+
+        return jsonify({'reply': reply})
+    except Exception as e:
+        return jsonify({'error': str(e), 'reply': '⚠️ AI error: ' + str(e)}), 500
 
 if __name__ == '__main__':
     init_db()
